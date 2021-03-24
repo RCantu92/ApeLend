@@ -4,10 +4,11 @@ pragma solidity ^0.8.0;
 
 import "./TestNft.sol";
 
-contract BorrowLendProtocol is TestNft {
+abstract contract BorrowLendProtocol is TestNft {
 
-    // List (array?) of NFTs
+    // Mapping of available NFTs
     // (Display current owner)
+    mapping(uint => bool) internal isNftAvailable;
 
     // Time window (variable)
 
@@ -27,6 +28,11 @@ contract BorrowLendProtocol is TestNft {
     // Have time window that would then
     // allow us to retrieve NFT if creator/minter
     // contacts us to "repossess" NFT
+    function borrowNft(uint borrowingNftId) public {
+        require(isNftAvailable[borrowingNftId] == true, "NFT is not available to borrow.");
+        // Make sure they are providing NFT as collateral
+        transferNftToBorrower();
+    }
 
     // Function that accepts borrowing payment
     // for NFT. Pay creator and push a portion to
@@ -37,4 +43,8 @@ contract BorrowLendProtocol is TestNft {
     // or return has been passed
 
     // Function to lend NFT, English-style auction
+    // (WITHOUT ENGLISH-STYLE AUCTION FOR NOW)
+    function transferNftToBorrower() internal {
+
+    }
 }
