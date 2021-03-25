@@ -15,7 +15,7 @@ contract TestNft is ERC721 {
     }
 
     function ownerOf(uint tokenId) public view override returns (address) {
-        ERC721.ownerOf(tokenId);
+        return ERC721.ownerOf(tokenId);
     }
 
     // Mint new NFT to caller of function
