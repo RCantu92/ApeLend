@@ -29,9 +29,16 @@ contract TestNft is ERC721 {
         return ERC721.ownerOf(tokenId);
     }
 
+    // Function to return NFTs owned
+    // by provided address
+    function nftsOwned(address _owner) public view returns (uint[] memory) {
+        return nftsOfAddress[_owner];
+    }
+
     // Mint new NFT to caller of function
     function mintNewNft(uint _tokenId) public {
         ERC721._safeMint(msg.sender, _tokenId);
+        nftsOfAddress[msg.sender].push(_tokenId);
     }
 
     // Getter function for NFT collection name
