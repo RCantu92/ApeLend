@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/message-trace");
 
 describe("NFT contract", function () {
 
@@ -7,7 +8,7 @@ describe("NFT contract", function () {
         const testNft = await ethers.getContractFactory("TestNft");
 
         // First account that will deploy the contract
-        [firstAccount] = await ethers.getSigners();
+        [firstAccount, secondAccount] = await ethers.getSigners();
 
         // Deploy TestNft from first account
         // with the provided parameters
@@ -23,8 +24,6 @@ describe("NFT contract", function () {
         expect(await deployedTestNft.collectionSymbol()).to.equal("TEST");
       });
 
-    /*
-    // mintNewNft() has been changed to have `_to` parameter
     it("should allow a NFT to be minted to caller of function", async function() {
 
         // Mint new NFT with TokenID of `1`
@@ -33,19 +32,44 @@ describe("NFT contract", function () {
         // Confirm owner of NFT is nftCreator
         expect(await deployedTestNft.ownerOf(1)).to.equal(firstAccount.address);
     })
-    */
 
     it("should mint 10 NFTs to first account", async function() {
 
         // For loop that calls the function
-        // to mint ten new NFTs per number
-        for(let count = 2; count < 12; count++) {
-            await deployedTestNft.mintNewNft(count);
+        // to mint ten new NFTs to the second account
+        // (WILL HAVE TO RESET TOKEN ID`S AFTER EVERY TEST,
+        // OTHERWISE WILL HAVE TO INCREASE NUMBERS)
+        for(let count = 11; count < 21; count++) {
+            await deployedTestNft.connect(secondAccount).mintNewNft(count);
         }
 
         // confirm address has ten NFTs
         // (length of array should be `10` items)
-        expect((await deployedTestNft.nftsOwned(firstAccount.address)).length).to.equal(10);
+        expect((await deployedTestNft.connect(secondAccount).nftsOwned(secondAccount.address)).length).to.equal(10);
     })
+
+    /*
+    it({
+        asdf
+    })
+    */
+
+    /*
+    it({
+        asdf
+    })
+
+    it({
+        asdf
+    })
+
+    it({
+        asdf
+    })
+
+    it({
+        asdf
+    })
+    */
 
 })
