@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 // address
 contract TestNft is ERC721 {
 
+    // NFT collection name and symbol
     string _collectionName;
     string _collectionSymbol;
 
@@ -17,7 +18,7 @@ contract TestNft is ERC721 {
     mapping(address => uint[]) nftsOfAddress;
 
     // Set name of NFT collection
-    // and symbol
+    // and symbol upon contract deployment
     constructor (string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         _collectionName = _name;
         _collectionSymbol = _symbol;
@@ -25,8 +26,8 @@ contract TestNft is ERC721 {
 
     // Function to check the owner address
     // of a NFT by tokenId
-    function ownerOf(uint tokenId) public view override returns (address) {
-        return ERC721.ownerOf(tokenId);
+    function ownerOf(uint _tokenId) public view override returns (address) {
+        return ERC721.ownerOf(_tokenId);
     }
 
     // Function to return NFTs owned

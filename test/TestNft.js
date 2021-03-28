@@ -15,7 +15,7 @@ describe("NFT contract", function () {
         deployedTestNft = await testNft.deploy("Test Collection", "TEST");
 
         // Confirm the address that deployed the contract
-        // is the first account pulle from getSigners()
+        // is the first account pulled from getSigners()
         expect(await deployedTestNft.deployTransaction.from).to.equal(firstAccount.address);
 
         // Confirm parameters passed into Constructor function
@@ -33,7 +33,7 @@ describe("NFT contract", function () {
         expect(await deployedTestNft.ownerOf(1)).to.equal(firstAccount.address);
     })
 
-    it("should mint 10 NFTs to first account", async function() {
+    it("should mint 10 NFTs to second account", async function() {
 
         // For loop that calls the function
         // to mint ten new NFTs to the second account
@@ -45,31 +45,8 @@ describe("NFT contract", function () {
 
         // confirm address has ten NFTs
         // (length of array should be `10` items)
-        expect((await deployedTestNft.connect(secondAccount).nftsOwned(secondAccount.address)).length).to.equal(10);
+        expect((await deployedTestNft.connect(secondAccount)
+            .nftsOwned(secondAccount.address)).length).to.equal(10);
     })
-
-    /*
-    it({
-        asdf
-    })
-    */
-
-    /*
-    it({
-        asdf
-    })
-
-    it({
-        asdf
-    })
-
-    it({
-        asdf
-    })
-
-    it({
-        asdf
-    })
-    */
 
 })
