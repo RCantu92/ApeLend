@@ -12,11 +12,13 @@ contract BorrowLendProtocol {
     // (Display current owner)
     mapping(uint => bool) _isNftAvailable;
 
-    // Time window that would
-    // allow NFT to be repossesed
-    // if NFT has not be returned
-    // to owner
-    uint closingTimeWindow;
+    // Mapping that provides a NFTs
+    // time window of when it must be returned
+    mapping(uint => uint) _nftReturnWindow;
+
+    // Mapping that provides the
+    // borrower of given NFT
+    mapping(uint => address) _nftBorrower;
 
     // Mapping inside of a mapping
     // that displays the current owner
@@ -43,14 +45,17 @@ contract BorrowLendProtocol {
         // Add to mapping that displays
         // NFTs available to borrow
         _isNftAvailable[_nftId] = true;
-    }
 
+        // Transfer ownership of NFT to
+        // Borrow and Lend protocol address
+        testNft.transferFrom(msg.sender, address(this), _nftId);
+    }
     // Function to borrow NFT,
     // checks list of available NFTS
     // (collateral is a NFT that is valued by
     // the amount in ETH
     // it costs to mint provided NFTs).
-    // Have time window that would then
+    // Give value to time window that would then
     // allow us to retrieve NFT if creator/minter
     // contacts us to "repossess" NFT
     function borrowNft(uint _borrowingNftId, uint _collateralNftId) public payable {
@@ -60,6 +65,24 @@ contract BorrowLendProtocol {
         // function caller
         require(_isNftAvailable[_borrowingNftId] == true, "This NFT is not available to borrow.");
         require(msg.sender == testNft.ownerOf(_collateralNftId), "You are not the owner of the collateral NFT.");
+
+        // Set NFTs return window
+        _nftReturnWindow[_borrowingNftId] = 2 days;
+
+        // Take ownership of collateral NFT
+        // and pass to contract and display
+        // as available to borrow
+        testNft.transferFrom(address(this), msg.sender, _borrowingNftId);
+
+        // Mark NFT as unavailable to borrow
+        _isNftAvailable[_borrowingNftId] == false;
+        
+    }
+
+    // Function that allows us to `repossess` NFT
+    // and give back to owner
+    function repossesNft(uint _nftId) public {
+        // 
     }
 
     // Function that returns whether provided
@@ -70,8 +93,20 @@ contract BorrowLendProtocol {
 
     // Function to check the owner address
     // of a NFT by tokenId
-    function ownerOf(uint tokenId) public view returns (address) {
-        return testNft.ownerOf(tokenId);
+    function ownerOf(uint _tokenId) public view returns (address) {
+        return testNft.ownerOf(_tokenId);
+    }
+
+    // Function that provides a given NFT`s
+    // time window of when it must be returned
+    function nftReturnWindow(uint _nftId) public view returns (uint) {
+        return _nftReturnWindow[_nftId];
+    }
+
+    // Function that returns who is the borrower
+    // of a particular NFT
+    function nftBorrower(uint _nftId) public view returns (address) {
+        return _nftBorrower[_nftId];
     }
 
     /*

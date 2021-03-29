@@ -49,4 +49,15 @@ describe("NFT contract", function () {
             .nftsOwned(secondAccount.address)).length).to.equal(10);
     })
 
+    it("should allow the transfer of an NFT", async function() {
+        // Confirm the owner of NFT ID `1` to be firstAccount
+        expect(await deployedTestNft.ownerOf(1)).to.equal(firstAccount.address);
+
+        // Transfer ownership of NFT ID `1` to secondAccount
+        await deployedTestNft.transferFrom(firstAccount.address, secondAccount.address, 1);
+
+        // Confirm the ownership of NFT ID `1` is secondAccoount
+        expect(await deployedTestNft.connect(secondAccount).ownerOf(1)).to.equal(secondAccount.address);
+    })
+
 })

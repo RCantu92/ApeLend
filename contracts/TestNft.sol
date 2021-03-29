@@ -24,6 +24,18 @@ contract TestNft is ERC721 {
         _collectionSymbol = _symbol;
     }
 
+    // Mint new NFT to caller of function
+    function mintNewNft(uint _tokenId) public {
+        ERC721._safeMint(msg.sender, _tokenId);
+        nftsOfAddress[msg.sender].push(_tokenId);
+    }
+
+    // Function that allows NFT to have
+    // ownership transferred
+    function transferFrom(address _from, address _to, uint256 _tokenId) public override {
+        ERC721.transferFrom(_from, _to, _tokenId);
+    }
+
     // Function to check the owner address
     // of a NFT by tokenId
     function ownerOf(uint _tokenId) public view override returns (address) {
@@ -35,12 +47,7 @@ contract TestNft is ERC721 {
     function nftsOwned(address _owner) public view returns (uint[] memory) {
         return nftsOfAddress[_owner];
     }
-
-    // Mint new NFT to caller of function
-    function mintNewNft(uint _tokenId) public {
-        ERC721._safeMint(msg.sender, _tokenId);
-        nftsOfAddress[msg.sender].push(_tokenId);
-    }
+    
 
     // Getter function for NFT collection name
     function collectionName() public view returns (string memory) {
