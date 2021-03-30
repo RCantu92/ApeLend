@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "./TestNft.sol";
+// import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract BorrowLendProtocol {
+contract BorrowLendProtocol /*is IERC721Receiver*/ {
 
     TestNft testNft = TestNft(0x5FbDB2315678afecb367f032d93F642f64180aa3);
 
@@ -36,6 +37,18 @@ contract BorrowLendProtocol {
     // contacts us to do, only if time window for repayment
     // or return has been passed
 
+    /*
+    // Function that allows contract to hold NFTs
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external override returns (bytes4) {
+
+    }
+    */
+
     // Function to lend NFT
     function lendNft(uint _nftId) public {
         // Verify caller of function is
@@ -48,8 +61,11 @@ contract BorrowLendProtocol {
 
         // Transfer ownership of NFT to
         // Borrow and Lend protocol address
-        testNft.transferFrom(msg.sender, address(this), _nftId);
+        testNft.safeTransferFrom(msg.sender, address(this), _nftId);
+
+        testNft.onERC721Received(msg.sender, address(this), _nftId);
     }
+
     // Function to borrow NFT,
     // checks list of available NFTS
     // (collateral is a NFT that is valued by
@@ -72,18 +88,20 @@ contract BorrowLendProtocol {
         // Take ownership of collateral NFT
         // and pass to contract and display
         // as available to borrow
-        testNft.transferFrom(address(this), msg.sender, _borrowingNftId);
+        testNft.safeTransferFrom(address(this), msg.sender, _borrowingNftId);
 
         // Mark NFT as unavailable to borrow
         _isNftAvailable[_borrowingNftId] == false;
         
     }
 
+    /*
     // Function that allows us to `repossess` NFT
     // and give back to owner
     function repossesNft(uint _nftId) public {
         // 
     }
+    */
 
     // Function that returns whether provided
     // ID for NFT is available to borrow

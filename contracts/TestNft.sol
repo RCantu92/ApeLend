@@ -3,11 +3,12 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 // Contract that allows new NFTs to be minted
 // and also tracks ownership of NFTs to owner
 // address
-contract TestNft is ERC721 {
+contract TestNft is ERC721, IERC721Receiver {
 
     // NFT collection name and symbol
     string _collectionName;
@@ -30,10 +31,20 @@ contract TestNft is ERC721 {
         nftsOfAddress[msg.sender].push(_tokenId);
     }
 
+    // Function that allows contract to hold NFTs
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        return IERC721.onERC721Received.selector;
+    }
+
     // Function that allows NFT to have
     // ownership transferred
-    function transferFrom(address _from, address _to, uint256 _tokenId) public override {
-        ERC721.transferFrom(_from, _to, _tokenId);
+    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public override {
+        ERC721.safeTransferFrom(_from, _to, _tokenId);
     }
 
     // Function to check the owner address

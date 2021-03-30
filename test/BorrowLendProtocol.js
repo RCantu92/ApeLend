@@ -46,7 +46,7 @@ describe("Borrow and Lend Protocol contract", function() {
     })
 
     it ("should allow the borrowing of available NFT", async function() {
-        
+
     })
 
     /*
