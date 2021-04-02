@@ -3,12 +3,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 // Contract that allows new NFTs to be minted
 // and also tracks ownership of NFTs to owner
 // address
-contract TestNft is ERC721, IERC721Receiver {
+contract TestNft is ERC721, IERC721Receiver, ERC721Holder {
 
     // NFT collection name and symbol
     string _collectionName;
@@ -23,6 +25,7 @@ contract TestNft is ERC721, IERC721Receiver {
     constructor (string memory _name, string memory _symbol) ERC721(_name, _symbol) {
         _collectionName = _name;
         _collectionSymbol = _symbol;
+        supportsInterface(IERC721Receiver.onERC721Received.selector);
     }
 
     // Mint new NFT to caller of function
@@ -37,13 +40,13 @@ contract TestNft is ERC721, IERC721Receiver {
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external override returns (bytes4) {
-        return IERC721.onERC721Received.selector;
+    ) public override(ERC721Holder, IERC721Receiver) returns (bytes4) {
+        return ERC721Holder.onERC721Received.selector;
     }
 
     // Function that allows NFT to have
     // ownership transferred
-    function safeTransferFrom(address _from, address _to, uint256 _tokenId) public override {
+    function transferFrom(address _from, address _to, uint256 _tokenId) public override {
         ERC721.safeTransferFrom(_from, _to, _tokenId);
     }
 

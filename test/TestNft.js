@@ -22,7 +22,8 @@ describe("NFT contract", function () {
         // are the parameters previously provided
         expect(await deployedTestNft.collectionName()).to.equal("Test Collection");
         expect(await deployedTestNft.collectionSymbol()).to.equal("TEST");
-      });
+    });
+
 
     it("should allow a NFT to be minted to caller of function", async function() {
 
@@ -58,6 +59,10 @@ describe("NFT contract", function () {
 
         // Confirm the ownership of NFT ID `1` is secondAccoount
         expect(await deployedTestNft.connect(secondAccount).ownerOf(1)).to.equal(secondAccount.address);
+    })
+
+    it ("should allow contract to hold a NFT", async function() {
+        
     })
 
 })

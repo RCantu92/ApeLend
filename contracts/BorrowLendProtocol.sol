@@ -3,9 +3,8 @@
 pragma solidity ^0.8.0;
 
 import "./TestNft.sol";
-// import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-contract BorrowLendProtocol /*is IERC721Receiver*/ {
+contract BorrowLendProtocol {
 
     TestNft testNft = TestNft(0x5FbDB2315678afecb367f032d93F642f64180aa3);
 
@@ -63,7 +62,7 @@ contract BorrowLendProtocol /*is IERC721Receiver*/ {
         // Borrow and Lend protocol address
         testNft.safeTransferFrom(msg.sender, address(this), _nftId);
 
-        testNft.onERC721Received(msg.sender, address(this), _nftId);
+        // testNft.onERC721Received(msg.sender, address(this), _nftId);
     }
 
     // Function to borrow NFT,
