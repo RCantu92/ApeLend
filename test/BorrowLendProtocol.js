@@ -45,11 +45,12 @@ describe("Borrow and Lend Protocol contract", function() {
         expect(await deployedBorrowLend.isNftAvailable(1)).to.equal(true);
     })
 
+    /*
     it ("should allow the borrowing of available NFT", async function() {
 
     })
 
-    /*
+    
     it("should allow a NFT to be minted to caller of function", async function() {
         // Get TestNft code to deploy
         const borrowLendProtocol = await ethers.getContractFactory("BorrowLendProtocol");
