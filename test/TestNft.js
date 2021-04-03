@@ -61,8 +61,28 @@ describe("NFT contract", function () {
         expect(await deployedTestNft.connect(secondAccount).ownerOf(1)).to.equal(secondAccount.address);
     })
 
-    it ("should allow contract to hold a NFT", async function() {
+    it("should allow contract to hold a NFT", async function() {
+        // Confirm the owner of NFT ID `11` to be secondAccount
+        expect(await deployedTestNft.connect(secondAccount).ownerOf(11)).to.equal(secondAccount.address);
+
+        // Transfer NFT ID `11` to TestNft contract
+        await deployedTestNft.connect(secondAccount).transferFrom(secondAccount.address, deployedTestNft.address, 11);
         
+        // Confirm contract holds NFT ID `11`
+        expect(await deployedTestNft.connect(secondAccount).ownerOf(11)).to.equal(deployedTestNft.address);
     })
+
+    it("should allow contract to transfer NFT to another Externally Owned Account", async function() {
+        // Confirm the owner of NFT ID `12` to be secondAccount
+        expect(await deployedTestNft.connect(secondAccount).ownerOf(12)).to.equal(secondAccount.address);
+
+        // Transfer NFT ID `12` to TestNft contract
+        await deployedTestNft.connect(secondAccount).transferFrom(secondAccount.address, deployedTestNft.address, 12);
+
+        // Confirm contract holds NFT ID `11`
+        expect(await deployedTestNft.connect(secondAccount).ownerOf(12)).to.equal(deployedTestNft.address);
+
+        // 
+    }
 
 })

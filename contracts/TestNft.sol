@@ -35,6 +35,7 @@ contract TestNft is ERC721, IERC721Receiver, ERC721Holder {
     }
 
     // Function that allows contract to hold NFTs
+    /*
     function onERC721Received(
         address operator,
         address from,
@@ -43,6 +44,7 @@ contract TestNft is ERC721, IERC721Receiver, ERC721Holder {
     ) public override(ERC721Holder, IERC721Receiver) returns (bytes4) {
         return ERC721Holder.onERC721Received.selector;
     }
+    */
 
     // Function that allows NFT to have
     // ownership transferred
