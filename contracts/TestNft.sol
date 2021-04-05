@@ -43,26 +43,9 @@ contract TestNft is ERC721, IERC721Receiver, ERC721Holder {
         nftsOfAddress[msg.sender].push(_tokenId);
     }
 
-    // Function that allows contract to hold NFTs
-    /*
-    function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) public override(ERC721Holder, IERC721Receiver) returns (bytes4) {
-        return ERC721Holder.onERC721Received.selector;
-    }
-    */
-
     // Function that allows NFT to have
     // ownership transferred
     function transferFrom(address _from, address _to, uint256 _tokenId) public override {
-        /*
-        ERC721.setApprovalForAll();
-        ERC721.approve(_to, _tokenId);
-        */
-
         ERC721.safeTransferFrom(_from, _to, _tokenId);
     }
 
