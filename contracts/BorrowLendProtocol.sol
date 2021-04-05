@@ -3,9 +3,12 @@
 pragma solidity ^0.8.0;
 
 import "./TestNft.sol";
+import "hardhat/console.sol";
 
 contract BorrowLendProtocol {
 
+    // Create new instance of
+    // deployed TestNft contract
     TestNft testNft = TestNft(0x5FbDB2315678afecb367f032d93F642f64180aa3);
 
     // Mapping of available NFTs
@@ -49,18 +52,27 @@ contract BorrowLendProtocol {
     */
 
     // Function to lend NFT
-    function lendNft(uint _nftId) public {
+    function lendNft(address _from, address _to, uint _nftId) public {
         // Verify caller of function is
         // Owner of provided NFT ID
         require(msg.sender == testNft.ownerOf(_nftId), "You are not the owner of this NFT.");
+
+        // DELETE LATER
+        console.log("The _from parameter of the lendNft call in BorrowLendProtocol is: %s", _from);
+        console.log("The _to parameter of the lendNft call in BorrowLendProtocl is: %s", _to);
+        console.log("The BorrowLend contract address is: %s", address(this));
 
         // Add to mapping that displays
         // NFTs available to borrow
         _isNftAvailable[_nftId] = true;
 
+        // Approve receiving address
+        // to transfer NFT
+        testNft.approve(_to, _nftId);
+
         // Transfer ownership of NFT to
         // Borrow and Lend protocol address
-        testNft.safeTransferFrom(msg.sender, address(this), _nftId);
+        testNft.transferFrom(_from, _to, _nftId);
 
         // testNft.onERC721Received(msg.sender, address(this), _nftId);
     }

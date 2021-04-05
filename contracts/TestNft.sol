@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
+import "hardhat/console.sol";
+
 // Contract that allows new NFTs to be minted
 // and also tracks ownership of NFTs to owner
 // address
@@ -26,6 +28,15 @@ contract TestNft is ERC721, IERC721Receiver, ERC721Holder {
         _collectionName = _name;
         _collectionSymbol = _symbol;
         supportsInterface(IERC721Receiver.onERC721Received.selector);
+    }
+
+    // Function to give or rescind approval to
+    // protocol to handle NFT transactions
+    // (HARDCODE IN PROTOCOL'S ADDRESS)
+    function approveProtocolAddress(bool _approved) public {
+        console.log("The address being approved is: %s", 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512);
+        console.log("The address that is the msg.sender is: %s", msg.sender);
+        ERC721.setApprovalForAll(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512, _approved);
     }
 
     // Mint new NFT to caller of function
@@ -49,6 +60,15 @@ contract TestNft is ERC721, IERC721Receiver, ERC721Holder {
     // Function that allows NFT to have
     // ownership transferred
     function transferFrom(address _from, address _to, uint256 _tokenId) public override {
+        /*
+        ERC721.setApprovalForAll();
+        ERC721.approve(_to, _tokenId);
+        */
+
+        // DELETE LATER
+        console.log("The _from parameter in transferFrom in TestNft is: %s", _from);
+        console.log("The _to parameter in transferFrom in TestNft is: %s", _to);
+
         ERC721.safeTransferFrom(_from, _to, _tokenId);
     }
 
