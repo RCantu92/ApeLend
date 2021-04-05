@@ -46,26 +46,30 @@ describe("Borrow and Lend Protocol contract", function() {
         // put up to lend by owner
         expect(await deployedBorrowLend.isNftAvailable(25)).to.equal(false);
 
-        console.log("The owner of NFT ID `25` is: " + await deployedTestNft.ownerOf(25));
-
-        console.log("The address of firstAccount is: " + firstAccount.address);
-        console.log("The address of secondAccount is: " + secondAccount.address);
-
         // Give approval to TestNft contract to
         // handle NFT transactions
         await deployedTestNft.approveProtocolAddress(true);
 
-        // Provide NFT ID `1` from firstAccount
-        // to borrow
-        await deployedBorrowLend.lendNft(firstAccount.address, secondAccount.address, 25);
+        // Provide NFT ID `25` to protocol
+        // from firstAccount to borrow
+        await deployedBorrowLend.lendNft(deployedBorrowLend.address, 25);
 
         // Confirm NFT is available to borrow
         expect(await deployedBorrowLend.isNftAvailable(25)).to.equal(true);
+
+        // Confirm that the protocol currently
+        // is the owner of NFT ID `25`
+        expect(await deployedTestNft.ownerOf(25)).to.equal(deployedBorrowLend.address);
     })
 
     /*
     it ("should allow the borrowing of available NFT", async function() {
+        // Confirm NFT is available to borrow
+        expect(await deployedBorrowLend.isNftAvailable(25)).to.equal(true);
+
+
 
     })
     */
+
 })

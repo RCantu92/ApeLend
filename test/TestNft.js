@@ -83,6 +83,6 @@ describe("NFT contract", function () {
         expect(await deployedTestNft.connect(secondAccount).ownerOf(12)).to.equal(deployedTestNft.address);
 
         // 
-    }
+    })
 
 })

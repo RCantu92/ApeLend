@@ -3,9 +3,13 @@
 pragma solidity ^0.8.0;
 
 import "./TestNft.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+
 import "hardhat/console.sol";
 
-contract BorrowLendProtocol {
+contract BorrowLendProtocol is ERC721Holder {
 
     // Create new instance of
     // deployed TestNft contract
@@ -39,28 +43,22 @@ contract BorrowLendProtocol {
     // contacts us to do, only if time window for repayment
     // or return has been passed
 
-    /*
     // Function that allows contract to hold NFTs
-    function onERC721Received(
+    function onERC721ReceivedToProtocol(
         address operator,
         address from,
         uint256 tokenId,
-        bytes calldata data
-    ) external override returns (bytes4) {
-
+        bytes memory data
+    ) public returns (bytes4) {
+        ERC721Holder.onERC721Received(operator, from, tokenId, data);
     }
-    */
 
     // Function to lend NFT
-    function lendNft(address _from, address _to, uint _nftId) public {
+    // to protocol
+    function lendNft(address _to, uint _nftId) public {
         // Verify caller of function is
         // Owner of provided NFT ID
         require(msg.sender == testNft.ownerOf(_nftId), "You are not the owner of this NFT.");
-
-        // DELETE LATER
-        console.log("The _from parameter of the lendNft call in BorrowLendProtocol is: %s", _from);
-        console.log("The _to parameter of the lendNft call in BorrowLendProtocl is: %s", _to);
-        console.log("The BorrowLend contract address is: %s", address(this));
 
         // Add to mapping that displays
         // NFTs available to borrow
@@ -70,11 +68,12 @@ contract BorrowLendProtocol {
         // to transfer NFT
         testNft.approve(_to, _nftId);
 
+        // Confirm contract can receive NFTs
+        onERC721ReceivedToProtocol(msg.sender, msg.sender, _nftId, "");
+
         // Transfer ownership of NFT to
         // Borrow and Lend protocol address
-        testNft.transferFrom(_from, _to, _nftId);
-
-        // testNft.onERC721Received(msg.sender, address(this), _nftId);
+        testNft.transferFrom(msg.sender, address(this), _nftId);
     }
 
     // Function to borrow NFT,
