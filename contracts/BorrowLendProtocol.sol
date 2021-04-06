@@ -56,9 +56,6 @@ contract BorrowLendProtocol is ERC721Holder {
     // to protocol
     function lendNft(address _to, uint _nftId) public {
 
-        // DELETE
-        console.log("The msg.sender that is calling the lendNft() function is: %s", msg.sender);
-
         // Verify caller of function is
         // Owner of provided NFT ID
         require(msg.sender == testNft.ownerOf(_nftId), "You are not the owner of this NFT.");
@@ -87,19 +84,16 @@ contract BorrowLendProtocol is ERC721Holder {
     // Give value to time window that would then
     // allow us to retrieve NFT if creator/minter
     // contacts us to "repossess" NFT
-    function borrowNft(uint _borrowingNftId/*, uint _collateralNftId*/) public payable {
+    function borrowNft(uint _borrowingNftId, uint _collateralNftId) public payable {
         // Verify NFT is available
         // to borrow and verify
         // collateral NFT is owned by
         // function caller
         require(_isNftAvailable[_borrowingNftId] == true, "This NFT is not available to borrow.");
-        // require(msg.sender == testNft.ownerOf(_collateralNftId), "You are not the owner of the collateral NFT.");
-
-        // DELETE
-        console.log("The address of the borrowLendProtocol address(this) is: %s", address(this));
+        require(msg.sender == testNft.ownerOf(_collateralNftId), "You are not the owner of the collateral NFT.");
 
         // Lend Collateral NFT to protocol
-        // lendNft(address(this), _collateralNftId);
+        lendNft(address(this), _collateralNftId);
 
         // Set NFTs return window
         _nftReturnWindow[_borrowingNftId] = 2 days;
