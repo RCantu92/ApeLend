@@ -10,7 +10,7 @@ describe("Borrow and Lend Protocol contract", function() {
         const borrowLendProtocol = await ethers.getContractFactory("BorrowLendProtocol");
 
         // First account that will deploy the contract
-        [firstAccount, secondAccount, thirdAccount] = await ethers.getSigners();
+        [firstAccount, secondAccount, thirdAccount, fourthAccount, fifthAccount, sixthAccount] = await ethers.getSigners();
 
         // Deploy TestNft from first account
         // with the provided parameters
@@ -52,7 +52,7 @@ describe("Borrow and Lend Protocol contract", function() {
 
         // Provide NFT ID `25` to protocol
         // from firstAccount to borrow
-        await deployedBorrowLend.lendNft(deployedBorrowLend.address, 25);
+        await deployedBorrowLend.lendNft(25);
 
         // Confirm NFT is available to borrow
         expect(await deployedBorrowLend.isNftAvailable(25)).to.equal(true);
@@ -62,7 +62,7 @@ describe("Borrow and Lend Protocol contract", function() {
         expect(await deployedTestNft.ownerOf(25)).to.equal(deployedBorrowLend.address);
     })
 
-    it ("should allow the borrowing of available NFT", async function() {
+    it("should allow the borrowing of available NFT", async function() {
 
         // Confirm NFT is available to borrow
         expect(await deployedBorrowLend.isNftAvailable(25)).to.equal(true);
@@ -97,6 +97,68 @@ describe("Borrow and Lend Protocol contract", function() {
         // Confirm that thirdAccount is
         // currently the owner of NFT ID `25`
         expect(await deployedTestNft.connect(thirdAccount).ownerOf(25)).to.equal(thirdAccount.address);
+
+        // Confirm the `true` owner of NFT ID `36`
+        // is thirdAccount
+        expect(await deployedBorrowLend.connect(thirdAccount).trueNftOwner(36)).to.equal(thirdAccount.address);
     })
 
+    it ("should allow the borrowing and returning of NFT before being pulled by owner", async function() {
+        // Confirm NFT ID `36`
+        // is available to borrow
+        expect(await deployedBorrowLend.connect(fourthAccount).isNftAvailable(36)).to.equal(true);
+
+        // Mint new NFT ID `48` to fourthAccount
+        await deployedTestNft.connect(fourthAccount).mintNewNft(48);
+
+        // Confirm NFT ID `48` belongs
+        // to fourthAccount
+        expect(await deployedTestNft.connect(fourthAccount).ownerOf(48)).to.equal(fourthAccount.address)
+
+        // Give approval to BorrowLendProtocol contract to
+        // handle NFT transactions
+        await deployedTestNft.connect(fourthAccount).approveProtocolAddress(true);
+
+        // Call function to borrow NFT ID `36`
+        // by providing NFT ID `48` as collateral
+        await deployedBorrowLend.connect(fourthAccount).borrowNft(36, 48);
+
+        // Confirm collateral NFT ID `48`
+        // is available to borrow
+        expect(await deployedBorrowLend.connect(fourthAccount).isNftAvailable(48)).to.equal(true);
+
+        // Confirm borrowed NFT ID `36`
+        // is unavailable to borrow
+        expect(await deployedBorrowLend.connect(fourthAccount).isNftAvailable(36)).to.equal(false);
+
+        // Confirm `true` owner of NFT ID `36`
+        // is thirdAccount
+        expect(await deployedBorrowLend.connect(fourthAccount).trueNftOwner(36)).to.equal(thirdAccount.address);
+
+        // Call function to return NFT ID `36`
+        // to protocol from borrower
+        await deployedBorrowLend.connect(fourthAccount).returnNft(36);
+
+        // Confirm `owner` of NFT ID `36`
+        // is now the protocol
+        expect(await deployedTestNft.ownerOf(36)).to.equal(deployedBorrowLend.address);
+
+        // Pull NFT listing by NFT ID `36`
+        // true owner
+        await deployedBorrowLend.connect(thirdAccount).pullNft(36);
+
+        // Confirm owner of NFT ID `36`
+        // is thirdAccount
+        expect(await deployedTestNft.connect(thirdAccount).ownerOf(36)).to.equal(thirdAccount.address);
+
+        // Confirm NFT ID `36`
+        // is unavaiable for lending
+        expect(await deployedBorrowLend.connect(thirdAccount).isNftAvailable(36)).to.equal(false);
+    })
+
+    /*
+    it("should allow ApeLend to confiscate borrowed NFT back to owner if time window is up", async function() {
+
+    })
+    */
 })
