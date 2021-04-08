@@ -1,5 +1,8 @@
 const { expect } = require("chai");
 const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/message-trace");
+const { time } = require("@openzeppelin/test-helpers");
+
+const BigNumber = require("bignumber.js");
 
 describe("Borrow and Lend Protocol contract", function() {
 
@@ -156,9 +159,68 @@ describe("Borrow and Lend Protocol contract", function() {
         expect(await deployedBorrowLend.connect(thirdAccount).isNftAvailable(36)).to.equal(false);
     })
 
-    /*
     it("should allow ApeLend to confiscate borrowed NFT back to owner if time window is up", async function() {
+        // Mint new NFT ID `53` to fifthAccount
+        await deployedTestNft.connect(fifthAccount).mintNewNft(53);
 
+        // Mint new NFT ID `94` to secondAccount
+        await deployedTestNft.connect(secondAccount).mintNewNft(94);
+
+        // Confirm NFT ID `53` belongs
+        // to fifthAccount
+        expect(await deployedTestNft.connect(fifthAccount).ownerOf(53)).to.equal(fifthAccount.address);
+
+        // Confirm NFT ID `94` belongs
+        // to secondAccount
+        expect(await deployedTestNft.connect(secondAccount).ownerOf(94)).to.equal(secondAccount.address);
+
+        // Give approval to BorrowLendProtocol contract to
+        // handle NFT transactions from fifthAccount
+        await deployedTestNft.connect(fifthAccount).approveProtocolAddress(true);
+
+        // Give approval to BorrowLendProtocol contract to
+        // handle NFT transactions from secondAccount
+        await deployedTestNft.connect(secondAccount).approveProtocolAddress(true);
+
+        // Lend NFT ID `94` from secondAccount
+        await deployedBorrowLend.connect(secondAccount).lendNft(94);
+
+        // Borrow NFT ID `94` from fifthAccount
+        // by providing NFT ID `53` from fifthAccount
+        await deployedBorrowLend.connect(fifthAccount).borrowNft(94, 53);
+
+        // Provide time unit by how much to increase
+        // Hardhat Network
+        // Then advance to desired block
+        await time.increase(time.duration.minutes(3));
+        await time.advanceBlock();
+
+        // Confirm borrowed NFT ID `94` is unavailable
+        // to be borrowed
+        expect(await deployedBorrowLend.connect(secondAccount).isNftAvailable(94)).to.equal(false);
+
+        // Confirm collateral NFT ID `53` is available
+        // to be borrowed
+        expect(await deployedBorrowLend.connect(fifthAccount).isNftAvailable(53)).to.equal(true);
+
+        // Confirm that the current time has passed the
+        // time windwo to return NFT ID `94`
+        expect((await deployedBorrowLend.connect(secondAccount).nftReturnWindow(94)) <
+            await deployedBorrowLend.connect(secondAccount).currentBlockTimestamp()).to.equal(true);
+
+        
+        // Give protocol creator address to repossess
+        // NFT ID `94` back to true owner
+        // (TROUBLE LINE)
+        await deployedBorrowLend.connect(secondAccount).requestRepossessionOfNft(94);
+
+        // Protocol repossesses NFT ID `94` from borrower
+        // and returns to true owner
+        await deployedBorrowLend.connect(firstAccount).protocolNftRepossession(94);
+
+        // Confirm true owner and current owner are
+        // both secondAccount
+        expect(await deployedTestNft.connect(secondAccount).ownerOf(94)).to.equal(secondAccount.address);
+        expect(await deployedBorrowLend.connect(secondAccount).trueNftOwner(94)).to.equal(secondAccount.address);
     })
-    */
 })
