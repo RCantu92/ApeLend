@@ -137,8 +137,8 @@ contract BorrowLendProtocol is ERC721Holder {
     // and give back to owner
     function requestRepossessionOfNft(uint _nftId) public {
         // Confirm function caller is
-        // owner of provided NFT ID
-        require(msg.sender == testNft.ownerOf(_nftId), "You are not the owner of the collateral NFT");
+        // 'true' owner of provided NFT ID
+        require(msg.sender == _trueNftOwner[_nftId], "You are not the true owner of the provided NFT ID");
         // Confirm return time window has passed
         require(block.timestamp > _nftReturnWindow[_nftId], "It is too early to reposses NFT");
         // Confirm NFT is lent out to a different

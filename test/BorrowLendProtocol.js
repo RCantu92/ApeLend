@@ -189,7 +189,7 @@ describe("Borrow and Lend Protocol contract", function() {
         // by providing NFT ID `53` from fifthAccount
         await deployedBorrowLend.connect(fifthAccount).borrowNft(94, 53);
 
-        // Provide time unit by how much to increase
+        // Provide time unit (3 minutes) by how much to increase
         // Hardhat Network
         // Then advance to desired block
         await time.increase(time.duration.minutes(3));
@@ -209,9 +209,8 @@ describe("Borrow and Lend Protocol contract", function() {
             await deployedBorrowLend.connect(secondAccount).currentBlockTimestamp()).to.equal(true);
 
         
-        // Give protocol creator address to repossess
-        // NFT ID `94` back to true owner
-        // (TROUBLE LINE)
+        // Give protocol creator address approval
+        // to repossess NFT ID `94` back to true owner
         await deployedBorrowLend.connect(secondAccount).requestRepossessionOfNft(94);
 
         // Protocol repossesses NFT ID `94` from borrower
