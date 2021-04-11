@@ -1,7 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
 require("dotenv").config({path: "./.env"});
-const AlchemyRopsten = process.env.ALCHEMY_ROPSTEN;
+const alchemyRopsten = process.env.ALCHEMY_ROPSTEN;
 const ropstenPrivateKey = process.env.ROPSTEN_PRIVATE_KEY;
 
 /**
@@ -12,7 +12,7 @@ module.exports = {
     hardhat: {
     },
     ropsten: {
-      url: AlchemyRopsten,
+      url: `https://eth-ropsten.alchemyapi.io/v2/${alchemyRopsten}`,
       accounts: [`0x${ropstenPrivateKey}`]
     }
   },
