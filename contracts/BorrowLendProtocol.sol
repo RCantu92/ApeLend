@@ -218,7 +218,7 @@ contract BorrowLendProtocol is ERC721Holder {
     function isNftAvailable(uint _nftId) public view returns (bool) {
         return _isNftAvailable[_nftId];
     }
-
+\
     // Function to check the owner address
     // of a NFT by tokenId
     function ownerOf(uint _tokenId) public view returns (address) {
