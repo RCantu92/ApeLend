@@ -2,12 +2,16 @@ import React, { Component } from 'react';
 import apeLendInstance from '../ethers/ApeLend.js';
 
 class apeLend extends Component {
+
+  // Get initial properties,
+  // call deployed contract instance there?
+
   async componentDidMount() {
 
     // const currentBlockTimestamp = await apeLendInstance.currentBlockTimestamp();
-    // await apeLendInstance.isNftAvailable();
+    const creatorAddress = await apeLendInstance.protocolCreator();
 
-    // console.log(currentBlockTimestamp);
+    console.log(creatorAddress);
   }
 
   render() {
