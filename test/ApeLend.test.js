@@ -7,163 +7,141 @@ const BigNumber = require("bignumber.js");
 describe("ApeLend contract", function() {
 
     before( async function() {
-        // Get TestNft code to deploy
-        // const testNft = await ethers.getContractFactory("TestNft");
-        // Get BorrowLendProtocol code to deploy
+        // Get ApeLendProtocol code to deploy
         const apeLendProtocol = await ethers.getContractFactory("ApeLend");
 
         // First account that will deploy the contract
         [firstAccount, secondAccount, thirdAccount, fourthAccount, fifthAccount, sixthAccount] = await ethers.getSigners();
 
-        // Deploy TestNft from first account
-        // with the provided parameters
-        // deployedTestNft = await testNft.deploy("Test Collection", "TEST");
-        // Deploy BorrowLendProtocol from first account
+        // Deploy ApeLendProtocol from first account
         deployedApeLend = await apeLendProtocol.deploy();
-
-        // Confirm the address that deployed the NFT contract
-        // is the first account pulled from getSigners()
-        // expect(await deployedTestNft.deployTransaction.from).to.equal(firstAccount.address);
 
         // Confirm the address that deployed the Protocol contract
         // is the first account pulled from getSigners()
         expect(await deployedApeLend.deployTransaction.from).to.equal(firstAccount.address);
-
-        // Confirm parameters passed into Constructor function
-        // are the parameters previously provided
-        // expect(await deployedTestNft.collectionName()).to.equal("Test Collection");
-        // expect(await deployedTestNft.collectionSymbol()).to.equal("TEST");
-
     });
 
-    it("should allow a NFT to be minted to caller of function", async function() {
+    it("should allow a token to be minted to caller of function", async function() {
 
-        // Mint new NFT with TokenID of `1`
+        // Mint new token with ID of `1`
         await deployedApeLend.safeMint(firstAccount.address, 1);
 
-        // Confirm owner of NFT is nftCreator
+        // Confirm owner of token is tokenCreator
         expect(await deployedApeLend.ownerOf(1)).to.equal(firstAccount.address);
     })
 
-    it("should mint 10 NFTs to second account", async function() {
+    it("should mint ten tokens to second account", async function() {
 
         // For loop that calls the function
-        // to mint ten new NFTs to the second account
+        // to mint ten new tokens to the second account
         // (WILL HAVE TO RESET TOKEN ID`S AFTER EVERY TEST,
         // OTHERWISE WILL HAVE TO INCREASE NUMBERS)
         for(let count = 11; count < 21; count++) {
             await deployedApeLend.connect(secondAccount).safeMint(secondAccount.address, count);
         }
 
-        // confirm address has ten NFTs
+        // confirm address has ten tokens
         // (length of array should be `10` items)
         expect(await deployedApeLend.connect(secondAccount)
             .balanceOf(secondAccount.address)).to.equal(10);
     })
 
-    it("should allow the transfer of a NFT", async function() {
-        // Confirm the owner of NFT ID `1` to be firstAccount
+    it("should allow the transfer of a token", async function() {
+        // Confirm the owner of token ID `1` to be firstAccount
         expect(await deployedApeLend.ownerOf(1)).to.equal(firstAccount.address);
 
-        // Transfer ownership of NFT ID `1` to secondAccount
+        // Transfer ownership of token ID `1` to secondAccount
         // write `['safeTransferFrom(address,address,uint25)']`
         // to solve for the fact safeTransferFrom() is an overloaded function
         await deployedApeLend['safeTransferFrom(address,address,uint256)'](firstAccount.address, secondAccount.address, 1);
 
-        // Confirm the ownership of NFT ID `1` is secondAccount
+        // Confirm the ownership of token ID `1` is secondAccount
         expect(await deployedApeLend.connect(secondAccount).ownerOf(1)).to.equal(secondAccount.address);
     })
 
-    it("should allow contract to hold a NFT", async function() {
-        // Confirm the owner of NFT ID `11` to be secondAccount
+    it("should allow contract to hold a token", async function() {
+        // Confirm the owner of token ID `11` to be secondAccount
         expect(await deployedApeLend.connect(secondAccount).ownerOf(11)).to.equal(secondAccount.address);
 
-        // Transfer NFT ID `11` to TestNft contract
+        // Transfer token ID `11` to ApeLend contract
         await deployedApeLend.connect(secondAccount)['safeTransferFrom(address,address,uint256)'](secondAccount.address, deployedApeLend.address, 11);
         
-        // Confirm contract holds NFT ID `11`
+        // Confirm contract holds token ID `11`
         expect(await deployedApeLend.connect(secondAccount).ownerOf(11)).to.equal(deployedApeLend.address);
     })
 
-    it("should allow NFT owner to put up NFT for lending", async function() {
-        // Mint new NFT with TokenID of `25`
-        // to firstAccount
-        // await deployedTestNft.mintNewNft(25);
-
-        // Confirm that firstAccount is owner
-        // of NFT ID `25`
-        // expect(await deployedTestNft.ownerOf(25)).to.equal(firstAccount.address);
-
-        // Mint new NFT with TokenID of `25`
+    it("should allow token owner to put up token for lending", async function() {
+        // Mint new token with token ID of `25`
         // to firstAccount
         await deployedApeLend.safeMint(firstAccount.address, 25);
 
         // Confirm that firstAccount is owner
-        // of NFT ID `25`
+        // of token ID `25`
         expect(await deployedApeLend.ownerOf(25)).to.equal(firstAccount.address);
 
-        // Confirm NFT ID `25` is not available
+        // Confirm token ID `25` is not available
         // which would mean it is not able to be
         // put up to lend by owner
         expect(await deployedApeLend.isNftAvailable(25)).to.equal(false);
 
         // Give approval to ApeLend contract to
-        // handle NFT transactions
-        await deployedApeLend.setApprovalForAll(true);
+        // handle token transactions
+        await deployedApeLend.approveProtocolAddress(true);
 
-        // Provide NFT ID `25` to protocol
+        // Provide token ID `25` to protocol
         // from firstAccount to borrow
         await deployedApeLend.lendNft(25);
 
-        // Confirm NFT is available to borrow
+        // Confirm token is available to borrow
         expect(await deployedApeLend.isNftAvailable(25)).to.equal(true);
 
         // Confirm that the protocol currently
-        // is the owner of NFT ID `25`
-        expect(await deployedTestNft.ownerOf(25)).to.equal(deployedApeLend.address);
+        // is the owner of token ID `25`
+        expect(await deployedApeLend.ownerOf(25)).to.equal(deployedApeLend.address);
     })
 
-    /*
-    it("should allow the borrowing of available NFT", async function() {
+    it("should allow the borrowing of available token", async function() {
 
-        // Confirm NFT is available to borrow
+        // Confirm token is available to borrow
         expect(await deployedApeLend.isNftAvailable(25)).to.equal(true);
 
-        // Mint new NFT ID `36` to thirdAccount
-        await deployedTestNft.connect(thirdAccount).mintNewNft(36);
+        // Mint new token ID `36` to thirdAccount
+        await deployedApeLend.connect(thirdAccount).safeMint(thirdAccount.address, 36);
 
-        // Confirm NFT ID `36` belongs
+        // Confirm token ID `36` belongs
         // to thirdAccount
-        expect(await deployedTestNft.connect(thirdAccount).ownerOf(36)).to.equal(thirdAccount.address)
+        expect(await deployedApeLend.connect(thirdAccount).ownerOf(36)).to.equal(thirdAccount.address);
 
-        // Give approval to BorrowLendProtocol contract to
-        // handle NFT transactions
-        await deployedTestNft.connect(thirdAccount).approveProtocolAddress(true);
+        // Give approval to ApeLend contract to
+        // handle token transactions
+        await deployedApeLend.connect(thirdAccount).approveProtocolAddress(true);
         
-        // Call function to borrow NFT ID `25`
-        // by providing NFT ID `36` as collateral
+        // Call function to borrow token ID `25`
+        // by providing token ID `36` as collateral
         await deployedApeLend.connect(thirdAccount).borrowNft(25, 36);
 
-        // Confirm collateral NFT
+        // Confirm collateral token
         // is available to borrow
         expect(await deployedApeLend.connect(thirdAccount).isNftAvailable(36)).to.equal(true);
 
         // Confirm that the protocol currently
-        // is the owner of NFT ID `36`
-        expect(await deployedTestNft.ownerOf(36)).to.equal(deployedApeLend.address);
+        // is the owner of token ID `36`
+        expect(await deployedApeLend.ownerOf(36)).to.equal(deployedApeLend.address);
 
-        // Confirm borrowed NFT
+        // Confirm borrowed token
         // is unavailable to borrow
         expect(await deployedApeLend.connect(thirdAccount).isNftAvailable(25)).to.equal(false);
 
         // Confirm that thirdAccount is
-        // currently the owner of NFT ID `25`
-        expect(await deployedTestNft.connect(thirdAccount).ownerOf(25)).to.equal(thirdAccount.address);
+        // currently the owner of token ID `25`
+        expect(await deployedApeLend.connect(thirdAccount).ownerOf(25)).to.equal(thirdAccount.address);
 
-        // Confirm the `true` owner of NFT ID `36`
+        // Confirm the `true` owner of token ID `36`
         // is thirdAccount
         expect(await deployedApeLend.connect(thirdAccount).trueNftOwner(36)).to.equal(thirdAccount.address);
     })
+
+    /*
 
     it ("should allow the borrowing and returning of NFT before being pulled by owner", async function() {
         // Confirm NFT ID `36`

@@ -36,8 +36,8 @@
       ]
     },
     "/Users/robertocantu/blockchain_programming/ApeLend/node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol": {
-      "lastModificationDate": 1625534581514,
-      "contentHash": "8f1c15639d1801a8117bdc64882e710b",
+      "lastModificationDate": 1625601907881,
+      "contentHash": "f33c5d63e67b117317dab21409479b9c",
       "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721.sol",
       "solcConfig": {
         "version": "0.8.6",
@@ -69,7 +69,8 @@
         "../../utils/Address.sol",
         "../../utils/Context.sol",
         "../../utils/Strings.sol",
-        "../../utils/introspection/ERC165.sol"
+        "../../utils/introspection/ERC165.sol",
+        "hardhat/console.sol"
       ],
       "versionPragmas": [
         "^0.8.0"
@@ -429,8 +430,8 @@
       ]
     },
     "/Users/robertocantu/blockchain_programming/ApeLend/contracts/ApeLend.sol": {
-      "lastModificationDate": 1625534590672,
-      "contentHash": "a656321daacd574ab8e5aadfadd78dfe",
+      "lastModificationDate": 1625601841231,
+      "contentHash": "911823efa14ffeb7affd6c3b5dfe765a",
       "sourceName": "contracts/ApeLend.sol",
       "solcConfig": {
         "version": "0.8.6",

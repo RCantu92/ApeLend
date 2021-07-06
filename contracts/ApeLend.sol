@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.6;
 
-// import "./TestNft.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -11,56 +10,53 @@ import "hardhat/console.sol";
 
 contract ApeLend is ERC721, ERC721Holder {
 
-    // Create new instance of
-    // deployed TestNft contract
-    // TestNft testNft;
-
     // Address of the protocol creator
-    address _protocolCreator;
+    address apeCreator;
 
     // Mapping displaying if provided
-    // NFT ID is available for borrowing
+    // token ID is available for borrowing
     // (Display current owner)
-    mapping(uint => bool) _isNftAvailable;
+    mapping(uint => bool) _isTokenAvailable;
 
-    // Mapping that provides a NFTs
+    // Mapping that provides a tokens
     // time window of when it must be returned
-    mapping(uint => uint) _nftReturnWindow;
+    mapping(uint => uint) _tokenReturnWindow;
 
     // Mapping that provides the
-    // borrower of given NFT
-    mapping(uint => address) _nftBorrower;
+    // borrower of given token
+    mapping(uint => address) _tokenBorrower;
 
     // Mapping that stores whether
     // protocol has permission from owner
-    // to reposses NFT to return to owner
+    // to reposses token to return to owner
     mapping(uint => bool) _protocolRepossessionPermission;
 
-    // Mapping that tracks the true NFT
-    // owner, to know who the NFT should be
+    // Mapping that tracks the true token
+    // owner, to know who the token should be
     // returned to
-    mapping(uint => address) _trueNftOwner;
+    mapping(uint => address) _trueTokenOwner;
 
     // Mapping inside of a mapping
     // that displays the current owner
-    // of an NFT as the borrower under
+    // of an token as the borrower under
     // said owner.
 
     // Function that accepts borrowing payment
-    // for NFT. Pay creator and push a portion to
+    // for token. Pay creator and push a portion to
     // a insurance fund
 
     // Constructor that sets the address
-    // of the protocol creator
-    constructor(/*address _testNFT*/) ERC721("ApeLend", "APE") {
-        _protocolCreator = msg.sender;
-        // testNft = TestNft(_testNFT);
+    // of apeCreator
+    constructor() ERC721("ApeLend", "APE") {
+        apeCreator = msg.sender;
     }
 
     // Function to give or rescind approval to
-    // ApeLend to handle NFT transactions
+    // ApeLend to handle token transactions
     // (HARDCODE IN PROTOCOL'S ADDRESS)
-    function setApprovalForAll(bool _approved) public {
+    // NAMING THIS FUNCTION `setApprovalForAll()`
+    // WAS THROWING "setApprovalForAll is not a function"
+    function approveProtocolAddress(bool _approved) public {
         ERC721.setApprovalForAll(0x5FbDB2315678afecb367f032d93F642f64180aa3, _approved);
     }
 
@@ -72,173 +68,173 @@ contract ApeLend is ERC721, ERC721Holder {
         ERC721._safeMint(_to, _tokenId);
     }
 
-    // Function that allows contract to hold NFTs
+    // Function that allows contract to hold tokens
     function onERC721ReceivedToProtocol(
         address operator,
         address from,
         uint256 tokenId,
         bytes memory data
     ) public returns (bytes4) {
-        ERC721Holder.onERC721Received(operator, from, tokenId, data);
+        return ERC721Holder.onERC721Received(operator, from, tokenId, data);
     }
 
-    // Function to lend NFT
+    // Function to lend token
     // to protocol
-    function lendNft(uint _nftId) public {
+    function lendToken(uint _tokenId) public {
 
         // Verify caller of function is
-        // Owner of provided NFT ID
-        require(msg.sender == ERC721.ownerOf(_nftId), "You are not the owner of this NFT");
+        // Owner of provided token ID
+        require(msg.sender == ERC721.ownerOf(_tokenId), "ApeLend: You are not the owner of this token");
 
         // Add to mapping that tracks
-        // NFT true ownership
-        _trueNftOwner[_nftId] = msg.sender;
+        // token true ownership
+        _trueTokenOwner[_tokenId] = msg.sender;
 
         // Add to mapping that displays
-        // NFTs available to borrow
-        _isNftAvailable[_nftId] = true;
+        // tokens available to borrow
+        _isTokenAvailable[_tokenId] = true;
 
         // Approve receiving address
-        // to transfer NFT
-        ERC721.approve(address(this), _nftId);
+        // to transfer token
+        ERC721.approve(address(this), _tokenId);
 
-        // Confirm contract can receive NFTs
-        onERC721ReceivedToProtocol(msg.sender, msg.sender, _nftId, "");
+        // Confirm contract can receive tokens
+        onERC721ReceivedToProtocol(msg.sender, msg.sender, _tokenId, "");
 
-        // Transfer ownership of NFT to
-        // Borrow and Lend protocol address
-        ERC721.safeTransferFrom(msg.sender, address(this), _nftId);
+        // Transfer ownership of token to
+        // ApeLend protocol address
+        ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
     }
 
-    // Function to borrow NFT,
-    // checks list of available NFTS
-    // (collateral is a NFT that is valued by
+    // Function to borrow token,
+    // checks list of available tokens
+    // (collateral is a token that is valued by
     // the amount in ETH
-    // it costs to mint provided NFTs).
+    // it costs to mint provided tokens).
     // Give value to time window that would then
-    // allow us to retrieve NFT if creator/minter
-    // contacts us to "repossess" NFT
-    function borrowNft(uint _borrowingNftId, uint _collateralNftId) public payable {
-        // Verify NFT is available
+    // allow us to retrieve token if creator/minter
+    // contacts us to "repossess" token
+    function borrowToken(uint _borrowingTokenId, uint _collateralTokenId) public payable {
+        // Verify token is available
         // to borrow and verify
-        // collateral NFT is owned by
+        // collateral token is owned by
         // function caller
-        require(_isNftAvailable[_borrowingNftId] == true, "This NFT is not available to borrow");
-        require(msg.sender == ERC721.ownerOf(_collateralNftId), "You are not the owner of the collateral NFT");
+        require(_isTokenAvailable[_borrowingTokenId] == true, "ApeLend: This token is not available to borrow");
+        require(msg.sender == ERC721.ownerOf(_collateralTokenId), "ApeLend: You are not the owner of the collateral token");
 
-        // Lend Collateral NFT to protocol
-        lendNft(_collateralNftId);
+        // Lend Collateral token to protocol
+        lendToken(_collateralTokenId);
 
-        // Set NFTs return window
+        // Set tokens return window
         // (ADJUSTED FOR TESTING PURPOSES)
-        _nftReturnWindow[_borrowingNftId] = block.timestamp + 2 minutes;
+        _tokenReturnWindow[_borrowingTokenId] = block.timestamp + 2 minutes;
 
-        // Mark borrowed NFT as unavailable to borrow
-        _isNftAvailable[_borrowingNftId] = false;
+        // Mark borrowed token as unavailable to borrow
+        _isTokenAvailable[_borrowingTokenId] = false;
 
         // Update mapping to show which address
-        // borrowed given NFT
-        _nftBorrower[_borrowingNftId] = msg.sender;
+        // borrowed given token
+        _tokenBorrower[_borrowingTokenId] = msg.sender;
 
         // Approve protocol creator address
-        // to transfer NFT (in case NFT needs
+        // to transfer token (in case token needs
         // to be returned to true owner).
-        ERC721.approve(_protocolCreator, _borrowingNftId);
+        // ERC721.approve(apeCreator, _borrowingTokenId);
 
         // Transfer ownership temporarily (i.e. borrow)
-        // of NFT to function caller
-        ERC721.safeTransferFrom(address(this), msg.sender, _borrowingNftId);
+        // of token to function caller
+        ERC721.safeTransferFrom(address(this), msg.sender, _borrowingTokenId);
         
     }
 
-    // Function that allows us to `repossess` NFT
+    // Function that allows us to `repossess` token
     // and give back to owner
-    function requestRepossessionOfNft(uint _nftId) public {
+    function requestRepossessionOfToken(uint _tokenId) public {
         // Confirm function caller is
-        // 'true' owner of provided NFT ID
-        require(msg.sender == _trueNftOwner[_nftId], "You are not the true owner of the provided NFT ID");
+        // 'true' owner of provided token ID
+        require(msg.sender == _trueTokenOwner[_tokenId], "ApeLend: You are not the true owner of the provided token ID");
         // Confirm return time window has passed
-        require(block.timestamp > _nftReturnWindow[_nftId], "It is too early to reposses NFT");
-        // Confirm NFT is lent out to a different
+        require(block.timestamp > _tokenReturnWindow[_tokenId], "ApeLend: It is too early to reposses token");
+        // Confirm token is lent out to a different
         // address than the function caller
-        require(msg.sender != ERC721.ownerOf(_nftId), "You cannot reposses NFT that is in your possesion");
+        require(msg.sender != ERC721.ownerOf(_tokenId), "ApeLend: You cannot reposses token that is in your possesion");
 
-        // Give protocol permission to reposses NFT
-        _protocolRepossessionPermission[_nftId] = true;
+        // Give protocol permission to reposses token
+        _protocolRepossessionPermission[_tokenId] = true;
     }
 
     // Function that allows protocol address to
-    // return NFT to owner, after borrower has
+    // return token to owner, after borrower has
     // failed to return to owner
-    function protocolNftRepossession(uint _nftId) public {
-        // Confirm NFT has in fact been borrowed
-        require(_isNftAvailable[_nftId] == false, "Provided NFT ID has not been borrowed");
+    function protocolTokenRepossession(uint _tokenId) public {
+        // Confirm token has in fact been borrowed
+        require(_isTokenAvailable[_tokenId] == false, "ApeLend: Provided token ID has not been borrowed");
 
         // Confirm only protocol address can
         // call this function
-        require(msg.sender == _protocolCreator, "Function caller is not the protocol creator address");
+        require(msg.sender == apeCreator, "ApeLend: Function caller is not the protocol creator address");
 
         // Confirm protocol address has
-        // permission to repossess NFT
-        require(_protocolRepossessionPermission[_nftId] == true, "Protocol does not have permission to repossess this NFT");
+        // permission to repossess token
+        require(_protocolRepossessionPermission[_tokenId] == true, "ApeLend: Protocol does not have permission to repossess this token");
 
         // Transfer ownership back to owner
         // from borrower
-        ERC721.safeTransferFrom(ERC721.ownerOf(_nftId), _trueNftOwner[_nftId], _nftId);
+        ERC721.safeTransferFrom(ERC721.ownerOf(_tokenId), _trueTokenOwner[_tokenId], _tokenId);
     }
 
-    // Function to return NFT from borrower to true owner
+    // Function to return token from borrower to true owner
     // (MAY NEED TO ADD FUNCITONALITY THAT TAKES INTO 
-    // ACCOUNT THE NFT RETURN TIME WINDOW)
-    function returnNft(uint _nftId) public {
+    // ACCOUNT THE TOKEN RETURN TIME WINDOW)
+    function returnToken(uint _tokenId) public {
         // Confirm function caller is current
-        // borrower of NFT
-        require(msg.sender == ERC721.ownerOf(_nftId), "You are not the borrower of provided NFT");
-        // Confirm provided NFT has been borrowed
-        require(_isNftAvailable[_nftId] == false, "The provided NFT has been borrowed");
+        // borrower of token
+        require(msg.sender == ERC721.ownerOf(_tokenId), "ApeLend: You are not the borrower of provided token");
+        // Confirm provided token has been borrowed
+        require(_isTokenAvailable[_tokenId] == false, "ApeLend: The provided token has been borrowed");
 
         // Add to mapping that displays
-        // NFTs available to borrow
-        _isNftAvailable[_nftId] = true;
+        // tokens available to borrow
+        _isTokenAvailable[_tokenId] = true;
 
         // Approve receiving address
-        // to transfer NFT
-        ERC721.approve(address(this), _nftId);
+        // to transfer token
+        ERC721.approve(address(this), _tokenId);
 
-        // Confirm contract can receive NFTs
-        onERC721ReceivedToProtocol(msg.sender, msg.sender, _nftId, "");
+        // Confirm contract can receive Tokens
+        onERC721ReceivedToProtocol(msg.sender, msg.sender, _tokenId, "");
 
-        // Transfer ownership of NFT to
-        // Borrow and Lend protocol address
-        ERC721.safeTransferFrom(msg.sender, address(this), _nftId);
+        // Transfer ownership of token to
+        // ApeLend protocol address
+        ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
     }
 
-    // Function to pull NFT from protocol
-    function pullNft(uint _nftId) public {
+    // Function to pull token from ApeLend
+    function pullToken(uint _tokenId) public {
         // Confirm function caller is current
-        // borrower of NFT
-        require(msg.sender == _trueNftOwner[_nftId], "You are not the true owner of provided NFT");
-        // Confirm provided NFT has been borrowed
-        require(_isNftAvailable[_nftId] == true, "The provided NFT has been borrowed");
+        // true owner of token
+        require(msg.sender == _trueTokenOwner[_tokenId], "ApeLend: You are not the true owner of provided token");
+        // Confirm provided token has been borrowed
+        require(_isTokenAvailable[_tokenId] == true, "ApeLend: The provided token has been borrowed");
 
         // Update mapping to display
-        // NFT is unavailable to borrow
-        _isNftAvailable[_nftId] = false;
+        // token is unavailable to borrow
+        _isTokenAvailable[_tokenId] = false;
         
-        // Transfer ownership of NFT from
-        // Borrow and Lend protocol address
-        // to true NFT owner
-        ERC721.safeTransferFrom(address(this), msg.sender, _nftId);
+        // Transfer ownership of token from
+        // ApeLend protocol address
+        // to true token owner
+        ERC721.safeTransferFrom(address(this), msg.sender, _tokenId);
     }
 
     // Function that returns whether provided
-    // ID for NFT is available to borrow
-    function isNftAvailable(uint _nftId) public view returns (bool) {
-        return _isNftAvailable[_nftId];
+    // ID for token is available to borrow
+    function isTokenAvailable(uint _tokenId) public view returns (bool) {
+        return _isTokenAvailable[_tokenId];
     }
     
     // Function to check the owner address
-    // of a NFT by tokenId
+    // of a token by tokenId
     function ownerOf(uint _tokenId) public view override returns (address) {
         return ERC721.ownerOf(_tokenId);
     }
@@ -248,28 +244,27 @@ contract ApeLend is ERC721, ERC721Holder {
         return ERC721.balanceOf(_owner);
     }
 
-    /*
-    // Function that provides a given NFT`s
+    // Function that provides a given token`s
     // time window of when it must be returned
-    function nftReturnWindow(uint _nftId) public view returns (uint) {
-        return _nftReturnWindow[_nftId];
+    function TokenReturnWindow(uint _tokenId) public view returns (uint) {
+        return _tokenReturnWindow[_tokenId];
     }
 
     // Function that returns who is the borrower
-    // of a particular NFT
-    function nftBorrower(uint _nftId) public view returns (address) {
-        return _nftBorrower[_nftId];
+    // of a particular token
+    function TokenBorrower(uint _tokenId) public view returns (address) {
+        return _tokenBorrower[_tokenId];
     }
 
     // Function that returns the protocol address
     function protocolCreator() public view returns (address) {
-        return _protocolCreator;
+        return apeCreator;
     }
 
     // Function that returns the `true` owner
-    // of a given NFT ID
-    function trueNftOwner(uint _nftId) public view returns (address) {
-        return _trueNftOwner[_nftId];
+    // of a given token ID
+    function trueTokenOwner(uint _tokenId) public view returns (address) {
+        return _trueTokenOwner[_tokenId];
     }
 
     // TEST FUNCTION
