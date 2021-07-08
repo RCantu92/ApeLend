@@ -2,44 +2,40 @@
 
 pragma solidity ^0.8.6;
 
+import "./ApeTokenFactory.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import "hardhat/console.sol";
 
-contract ApeLend is ERC721, ERC721Holder {
+contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
 
     // Address of the protocol creator
     address apeCreator;
 
     // Mapping displaying if provided
-    // token ID is available for borrowing
-    // (Display current owner)
-    mapping(uint => bool) _isTokenAvailable;
+    // token ID serves as collateral for
+    // new apeTokens
+    mapping(uint => bool) _tokenCollateralized;
 
-    // Mapping that provides a tokens
-    // time window of when it must be returned
-    mapping(uint => uint) _tokenReturnWindow;
+    // Mapping that tracks which address
+    // have provided tokens to ApeLend
+    mapping(address => bool) _providedToken;
 
-    // Mapping that provides the
-    // borrower of given token
-    mapping(uint => address) _tokenBorrower;
-
+    /*
     // Mapping that stores whether
     // protocol has permission from owner
     // to reposses token to return to owner
     mapping(uint => bool) _protocolRepossessionPermission;
+    */
 
-    // Mapping that tracks the true token
-    // owner, to know who the token should be
-    // returned to
-    mapping(uint => address) _trueTokenOwner;
-
+    /*
     // Mapping inside of a mapping
     // that displays the current owner
     // of an token as the borrower under
     // said owner.
+    */
 
     // Function that accepts borrowing payment
     // for token. Pay creator and push a portion to
@@ -51,6 +47,7 @@ contract ApeLend is ERC721, ERC721Holder {
         apeCreator = msg.sender;
     }
 
+    /*
     // Function to give or rescind approval to
     // ApeLend to handle token transactions
     // (HARDCODE IN PROTOCOL'S ADDRESS)
@@ -59,10 +56,13 @@ contract ApeLend is ERC721, ERC721Holder {
     function approveProtocolAddress(bool _approved) public {
         ERC721.setApprovalForAll(0x5FbDB2315678afecb367f032d93F642f64180aa3, _approved);
     }
+    */
 
+    /*
     function safeTransferFrom(address _from, address _to, uint256 _tokenId) public override {
         ERC721.safeTransferFrom(_from, _to, _tokenId);
     }
+    */
 
     function safeMint(address _to, uint256 _tokenId) public {
         ERC721._safeMint(_to, _tokenId);
@@ -80,19 +80,19 @@ contract ApeLend is ERC721, ERC721Holder {
 
     // Function to lend token
     // to protocol
-    function lendToken(uint _tokenId) public {
+    function lendToken(uint _tokenId, uint _apeTokenAmount, uint _apeTokenReturnWindow) public {
 
         // Verify caller of function is
         // Owner of provided token ID
         require(msg.sender == ERC721.ownerOf(_tokenId), "ApeLend: You are not the owner of this token");
 
-        // Add to mapping that tracks
-        // token true ownership
-        _trueTokenOwner[_tokenId] = msg.sender;
+        // Local variable tracking owner of
+        // underlying tokenId
+        address _underlyingOwner = ERC721.ownerOf(_tokenId);
 
         // Add to mapping that displays
         // tokens available to borrow
-        _isTokenAvailable[_tokenId] = true;
+        _tokenCollateralized[_tokenId] = true;
 
         // Approve receiving address
         // to transfer token
@@ -101,52 +101,39 @@ contract ApeLend is ERC721, ERC721Holder {
         // Confirm contract can receive tokens
         onERC721ReceivedToProtocol(msg.sender, msg.sender, _tokenId, "");
 
+        // Declare and assign variable storing
+        // ApeLend address
+        address _apeLendAddress = address(this);
+
+        // Add address to mapping that show they have
+        // lent a token to ApeLend
+        _providedToken[msg.sender] = true;
+
         // Transfer ownership of token to
         // ApeLend protocol address
         ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
+
+        // Mint new ApeTokens
+        // FIGURE OUT THE STRINGS FOR NAME AND SYMBOL LATER
+        ApeTokenFactory.mintApeTokens(_tokenId, _apeLendAddress, _apeTokenAmount, _apeTokenReturnWindow);
     }
 
-    // Function to borrow token,
-    // checks list of available tokens
-    // (collateral is a token that is valued by
-    // the amount in ETH
-    // it costs to mint provided tokens).
-    // Give value to time window that would then
-    // allow us to retrieve token if creator/minter
-    // contacts us to "repossess" token
-    function borrowToken(uint _borrowingTokenId, uint _collateralTokenId) public payable {
-        // Verify token is available
-        // to borrow and verify
-        // collateral token is owned by
-        // function caller
-        require(_isTokenAvailable[_borrowingTokenId] == true, "ApeLend: This token is not available to borrow");
-        require(msg.sender == ERC721.ownerOf(_collateralTokenId), "ApeLend: You are not the owner of the collateral token");
+    // Function to borrow token.
+    function borrowToken(uint _underlyingTokenId, uint _borrowingApeTokenId) public payable {
 
-        // Lend Collateral token to protocol
-        lendToken(_collateralTokenId);
+        address _apeLendAddress = address(this);
 
-        // Set tokens return window
-        // (ADJUSTED FOR TESTING PURPOSES)
-        _tokenReturnWindow[_borrowingTokenId] = block.timestamp + 2 minutes;
-
-        // Mark borrowed token as unavailable to borrow
-        _isTokenAvailable[_borrowingTokenId] = false;
-
-        // Update mapping to show which address
-        // borrowed given token
-        _tokenBorrower[_borrowingTokenId] = msg.sender;
-
-        // Approve protocol creator address
-        // to transfer token (in case token needs
-        // to be returned to true owner).
-        // ERC721.approve(apeCreator, _borrowingTokenId);
+        // Verify calling address has provided a token
+        // to ApeLend as collateral
+        require(_providedToken[msg.sender] == true, "ApeLend: You have not lent a token to ApeLend");
 
         // Transfer ownership temporarily (i.e. borrow)
         // of token to function caller
-        ERC721.safeTransferFrom(address(this), msg.sender, _borrowingTokenId);
+        ApeTokenFactory.borrowApeToken(_underlyingTokenId, _borrowingApeTokenId, _apeLendAddress);
         
     }
 
+    /*
     // Function that allows us to `repossess` token
     // and give back to owner
     function requestRepossessionOfToken(uint _tokenId) public {
@@ -162,7 +149,9 @@ contract ApeLend is ERC721, ERC721Holder {
         // Give protocol permission to reposses token
         _protocolRepossessionPermission[_tokenId] = true;
     }
+    */
 
+    /*
     // Function that allows protocol address to
     // return token to owner, after borrower has
     // failed to return to owner
@@ -182,7 +171,9 @@ contract ApeLend is ERC721, ERC721Holder {
         // from borrower
         ERC721.safeTransferFrom(ERC721.ownerOf(_tokenId), _trueTokenOwner[_tokenId], _tokenId);
     }
+    */
 
+    /*
     // Function to return token from borrower to true owner
     // (MAY NEED TO ADD FUNCITONALITY THAT TAKES INTO 
     // ACCOUNT THE TOKEN RETURN TIME WINDOW)
@@ -208,7 +199,9 @@ contract ApeLend is ERC721, ERC721Holder {
         // ApeLend protocol address
         ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
     }
+    */
 
+    /*
     // Function to pull token from ApeLend
     function pullToken(uint _tokenId) public {
         // Confirm function caller is current
@@ -226,12 +219,15 @@ contract ApeLend is ERC721, ERC721Holder {
         // to true token owner
         ERC721.safeTransferFrom(address(this), msg.sender, _tokenId);
     }
+    */
 
+    /*
     // Function that returns whether provided
     // ID for token is available to borrow
     function isTokenAvailable(uint _tokenId) public view returns (bool) {
         return _isTokenAvailable[_tokenId];
     }
+    */
     
     // Function to check the owner address
     // of a token by tokenId
@@ -239,39 +235,51 @@ contract ApeLend is ERC721, ERC721Holder {
         return ERC721.ownerOf(_tokenId);
     }
 
+    /*
     // Returns the number of tokens in ``owner``'s account.
     function balanceOf(address _owner) public view override returns (uint256) {
         return ERC721.balanceOf(_owner);
     }
+    */
 
+    /*
     // Function that provides a given token`s
     // time window of when it must be returned
     function TokenReturnWindow(uint _tokenId) public view returns (uint) {
         return _tokenReturnWindow[_tokenId];
     }
+    */
 
+    /*
     // Function that returns who is the borrower
     // of a particular token
     function TokenBorrower(uint _tokenId) public view returns (address) {
         return _tokenBorrower[_tokenId];
     }
+    */
 
+    /*
     // Function that returns the protocol address
     function protocolCreator() public view returns (address) {
         return apeCreator;
     }
+    */
 
+    /*
     // Function that returns the `true` owner
     // of a given token ID
     function trueTokenOwner(uint _tokenId) public view returns (address) {
         return _trueTokenOwner[_tokenId];
     }
+    */
 
+    /*
     // TEST FUNCTION
     // Function that returns current block.timestamp
     function currentBlockTimestamp() public view returns (uint) {
         return block.timestamp;
     }
+    */
 
     /*
     // Fallback function

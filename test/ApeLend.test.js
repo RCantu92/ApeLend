@@ -46,6 +46,8 @@ describe("ApeLend contract", function() {
             .balanceOf(secondAccount.address)).to.equal(10);
     })
 
+    it("should allow the lending of a token, thus minting some new ApeTokens", async function() {})
+
     it("should allow the transfer of a token", async function() {
         // Confirm the owner of token ID `1` to be firstAccount
         expect(await deployedApeLend.ownerOf(1)).to.equal(firstAccount.address);
