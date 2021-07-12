@@ -88,17 +88,19 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
 
         // Local variable tracking owner of
         // underlying tokenId
-        address _underlyingOwner = ERC721.ownerOf(_tokenId);
+        // address _tokenOwner = ERC721.ownerOf(_tokenId);
 
         // Add to mapping that displays
-        // tokens available to borrow
+        // tokens that have been collateralized
+        // for newly minted ApeTokens
         _tokenCollateralized[_tokenId] = true;
 
-        // Approve receiving address
+        // Approve ApeLend address
         // to transfer token
         ERC721.approve(address(this), _tokenId);
 
-        // Confirm contract can receive tokens
+        // Confirm ApeLend contract
+        // can receive tokens
         onERC721ReceivedToProtocol(msg.sender, msg.sender, _tokenId, "");
 
         // Declare and assign variable storing
@@ -106,7 +108,7 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         address _apeLendAddress = address(this);
 
         // Add address to mapping that show they have
-        // lent a token to ApeLend
+        // provided a token to ApeLend
         _providedToken[msg.sender] = true;
 
         // Transfer ownership of token to
@@ -118,6 +120,7 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         ApeTokenFactory.mintApeTokens(_tokenId, _apeLendAddress, _apeTokenAmount, _apeTokenReturnWindow);
     }
 
+    /*
     // Function to borrow token.
     function borrowToken(uint _underlyingTokenId, uint _borrowingApeTokenId) public payable {
 
@@ -133,7 +136,6 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         
     }
 
-    /*
     // Function that allows us to `repossess` token
     // and give back to owner
     function requestRepossessionOfToken(uint _tokenId) public {
@@ -235,12 +237,14 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         return ERC721.ownerOf(_tokenId);
     }
 
-    /*
+    function ownerOfApeToken(uint _tokenId, uint _apeTokenId) public view returns (address _apeTokenOwner) {
+        return ApeTokenFactory.ownerOf(_tokenId, _apeTokenId);
+    }
+
     // Returns the number of tokens in ``owner``'s account.
     function balanceOf(address _owner) public view override returns (uint256) {
         return ERC721.balanceOf(_owner);
     }
-    */
 
     /*
     // Function that provides a given token`s

@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ApeTokenFactory",
+  "sourceName": "contracts/ApeTokenFactory.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212206fa3bcbd82b615ab21f2876a407267086bdf738e3c11762cad1a5c5b097a899164736f6c63430008060033",
+  "deployedBytecode": "0x6080604052600080fdfea26469706673582212206fa3bcbd82b615ab21f2876a407267086bdf738e3c11762cad1a5c5b097a899164736f6c63430008060033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -46,8 +46,15 @@ describe("ApeLend contract", function() {
             .balanceOf(secondAccount.address)).to.equal(10);
     })
 
-    it("should allow the lending of a token, thus minting some new ApeTokens", async function() {})
+    it("should allow the lending of a token, thus minting some new ApeTokens", async function() {
 
+        //
+        await deployedApeLend.lendToken(1, 10, 1);
+
+        expect(await deployedApeLend.ownerOfApeToken(1, 1001)).to.equal(deployedApeLend.address);
+    })
+
+    /*
     it("should allow the transfer of a token", async function() {
         // Confirm the owner of token ID `1` to be firstAccount
         expect(await deployedApeLend.ownerOf(1)).to.equal(firstAccount.address);
@@ -142,8 +149,6 @@ describe("ApeLend contract", function() {
         // is thirdAccount
         expect(await deployedApeLend.connect(thirdAccount).trueNftOwner(36)).to.equal(thirdAccount.address);
     })
-
-    /*
 
     it ("should allow the borrowing and returning of NFT before being pulled by owner", async function() {
         // Confirm NFT ID `36`
