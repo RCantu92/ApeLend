@@ -13,12 +13,12 @@ contract ApeTokenFactory /*is ApeToken*/ {
     mapping(uint => address) _apeTokenAddressPerTokenId;
 
     // Mapping displaying if provided
-    // token ID is available for borrowing
+    // ApeToken ID is available for borrowing
     // (Display current owner)
-    mapping(uint => bool) _isTokenAvailable;
+    mapping(uint => bool) _isApeTokenAvailable;
 
     // Mapping that provides the
-    // borrower of given token
+    // borrower of given apeToken
     mapping(uint => address) _tokenBorrower;
 
     // The token owner provided
@@ -26,20 +26,28 @@ contract ApeTokenFactory /*is ApeToken*/ {
     // must be returned
     uint apeTokenReturnWindow;
 
-    /*
-    function isApeTokenAvailable(uint _underlyingTokenId, uint _apeTokenId, address _apeLendAddress) internal returns (bool _availability) {
-        address _apeTokenCollectionAddress = _apeTokenAddressPerCollection[_underlyingTokenId];
+    // Function that confirms desired ApeToken
+    // is available
+    function isApeTokenAvailable(uint _underlyingTokenId, uint _apeTokenId, address _apeLendAddress) internal view returns (bool _availability) {
+        
+        // Pull address of desired ApeToken collection
+        address _apeTokenCollectionAddress = _apeTokenAddressPerTokenId[_underlyingTokenId];
 
+        // Create local instance of desired ApeToken collection
         ApeToken _apeTokenCollection = ApeToken(_apeTokenCollectionAddress);
-        address _ownerAddress = _apeTokenCollection.getOwners(_apeTokenId);
 
+        // Pull address of current desired ApeToken owner
+        address _ownerAddress = _apeTokenCollection.owners(_apeTokenId);
+
+        // Check if current owner is the
+        // ApeLend protocol, if so, desired
+        // ApeToken can be borrowed. 
         if(_ownerAddress == _apeLendAddress) {
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
     }
-    */
 
     function mintApeTokens(uint _underlyingTokenId, address _currentHolder, uint _apeTokenAmount, uint _apeTokenReturnWindow) internal {
         // FOR NOW, LIMIT THE AMOUNT OF TOKEN-BACKED APETOKENS THAT CAN BE CREATED PER TOKEN
@@ -67,25 +75,34 @@ contract ApeTokenFactory /*is ApeToken*/ {
             uint _apeTokenId = (_underlyingTokenId * 1000) + i;
 
             // Mint a new ApeToken with the newly generated ApeToken id
-            _apeTokenCollectionInstance.mint(_currentHolder, _apeTokenId);
+            _apeTokenCollectionInstance._safemint(_currentHolder, _apeTokenId);
         }
     }
 
-    /*
-    function borrowApeToken(uint _underlyingTokenId, uint _apeTokenId, address _apeLendAddress) internal {
+    // MAKE VISIBILITY PUBLIC FOR NOW, FIRGURE OUT HOW TO CHANGE
+    // IT TO MAKE IT MORE EXCLUSIVE
+    function borrowApeToken(uint _underlyingTokenId, uint _apeTokenId, address _apeLendAddress, address _to) public /*internal*/ {
         require(isApeTokenAvailable(_underlyingTokenId, _apeTokenId,_apeLendAddress) == true, "ApeTokenFactory: This token is not available to borrow");
 
-        // Mark borrowed token as unavailable to borrow
-        // _isTokenAvailable[_borrowingTokenId] = false;
+        // Mark desired ApeToken as unavailable to borrow
+        _isApeTokenAvailable[_apeTokenId] = false;
+
+        // Pull address of desired ApeToken collection
+        address _apeTokenCollectionAddress = _apeTokenAddressPerTokenId[_underlyingTokenId];
+
+        // Create local instance of desired ApeToken collection
+        ApeToken _apeTokenCollection = ApeToken(_apeTokenCollectionAddress);
 
         // Set tokens return window
         // apeTokenReturnWindow = block.timestamp + apeTokenReturnWindow;
 
         // Update mapping to show which address
         // borrowed given token
-        // _tokenBorrower[_borrowingTokenId] = msg.sender;
+        _tokenBorrower[_apeTokenId] = msg.sender;
+
+        // Transfer ApeToken to borrower
+        _apeTokenCollection.safeTransferFrom(_apeLendAddress, _to, _apeTokenId);
     }
-    */
 
     function ownerOf(uint _tokenId, uint _apeTokenId) internal view returns (address _owner) {
         return ApeToken(_apeTokenAddressPerTokenId[_tokenId]).owners(_apeTokenId);

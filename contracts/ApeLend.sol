@@ -120,22 +120,23 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         ApeTokenFactory.mintApeTokens(_tokenId, _apeLendAddress, _apeTokenAmount, _apeTokenReturnWindow);
     }
 
-    /*
     // Function to borrow token.
     function borrowToken(uint _underlyingTokenId, uint _borrowingApeTokenId) public payable {
 
         address _apeLendAddress = address(this);
+        address _borrower = msg.sender;
 
         // Verify calling address has provided a token
         // to ApeLend as collateral
-        require(_providedToken[msg.sender] == true, "ApeLend: You have not lent a token to ApeLend");
+        require(_providedToken[msg.sender] == true, "ApeLend: You have not provided a token to ApeLend");
 
         // Transfer ownership temporarily (i.e. borrow)
-        // of token to function caller
-        ApeTokenFactory.borrowApeToken(_underlyingTokenId, _borrowingApeTokenId, _apeLendAddress);
+        // of ApeToken to function caller
+        ApeTokenFactory.borrowApeToken(_underlyingTokenId, _borrowingApeTokenId, _apeLendAddress, _borrower);
         
     }
 
+    /*
     // Function that allows us to `repossess` token
     // and give back to owner
     function requestRepossessionOfToken(uint _tokenId) public {

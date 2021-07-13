@@ -48,10 +48,19 @@ describe("ApeLend contract", function() {
 
     it("should allow the lending of a token, thus minting some new ApeTokens", async function() {
 
-        //
+        // Have the first account lend a token
+        // to ApeLend and mint 10 new ApeTokens
         await deployedApeLend.lendToken(1, 10, 1);
 
+        // Confirm the current owner of the ApeTokens
+        // is the ApeLend protocol
         expect(await deployedApeLend.ownerOfApeToken(1, 1001)).to.equal(deployedApeLend.address);
+    })
+
+    it("should allow the borrowing of a ApeToken", async function() {
+
+        //
+        await deployedApeLend.borrowToken();
     })
 
     /*
