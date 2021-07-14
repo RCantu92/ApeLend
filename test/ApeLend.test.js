@@ -73,6 +73,14 @@ describe("ApeLend contract", function() {
         expect(await deployedApeLend.connect(secondAccount).ownerOfApeToken(1, 1002)).to.equal(secondAccount.address);
     })
 
+    it("should allow a token to be taken out of ApeLend, thus burning corresponding ApeTokens", async function() {
+
+    })
+
+    it("should not allow an owner to pull token, burn ApeTokens, until time has loan term has elapsed", async function() {
+        
+    })
+
     /*
     it("should allow the transfer of a token", async function() {
         // Confirm the owner of token ID `1` to be firstAccount

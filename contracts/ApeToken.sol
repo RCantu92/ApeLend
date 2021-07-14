@@ -108,10 +108,6 @@ contract ApeToken /*is IERC721*/ {
         return _owners[_apeTokenId] != address(0);
     }
 
-
-    // TESTING AREA
-
-
     //
     // @dev Approve `to` to operate on `tokenId`
     //
@@ -227,9 +223,32 @@ contract ApeToken /*is IERC721*/ {
         emit Transfer(_from, _to, _apeTokenId);
     }
 
+    //
+    // @dev Destroys `_apeTokenId`.
+    // The approval is cleared when the token is burned.
+    //
+    // Requirements:
+    //
+    // - `_apeTokenId` must exist.
+    //
+    // Emits a {Transfer} event.
+    //
+    // ALTER VISIBILITY TO PUBLIC, UNTIL CAN FIGURE OUT
+    // HOW TO MAKE IT MORE EXCLUSIVE TO WHO CAN CALL IT
+    function _burn(uint256 _apeTokenId) public /*internal*/ virtual {
+        address owner = ownerOf(_apeTokenId);
 
+        // LOOK MORE INTO HOOKS
+        //_beforeTokenTransfer(owner, address(0), tokenId);
 
-    // END OF TESTING AREA
+        // Clear approvals
+        _approve(address(0), _apeTokenId);
+
+        _balances[owner] -= 1;
+        delete _owners[_apeTokenId];
+
+        emit Transfer(owner, address(0), _apeTokenId);
+    }
 
     // ONLY MAKE IT PUBLIC VISIBILITY TO TEST IF FUNCTION 
     // CAN BE CALLED IN THE FACTORY FILE
