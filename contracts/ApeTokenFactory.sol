@@ -50,23 +50,23 @@ contract ApeTokenFactory /*is ApeToken*/ {
     }
 
     function mintApeTokens(uint _underlyingTokenId, address _currentHolder, uint _apeTokenAmount, uint _apeTokenReturnWindow) internal {
-        // FOR NOW, LIMIT THE AMOUNT OF TOKEN-BACKED APETOKENS THAT CAN BE CREATED PER TOKEN
-        // LIMIT 25
+        // FOR NOW, LIMIT THE AMOUNT OF TOKEN-BACKED APETOKENS
+        // THAT CAN BE CREATED PER TOKEN LIMIT 25
         require(_apeTokenAmount < 25, "ApeToken: You cannot mint more than 25 apeTokens per token");
 
         apeTokenReturnWindow = _apeTokenReturnWindow;
 
+        // Create new ApeToken contract instance
+        ApeToken apeTokenInstance = new ApeToken(_underlyingTokenId);
+
         // Pull address from a newly created instance
         // of the ApeToken standard per provided
         // collateralized ERC721 token
-        address _apeTokenCollectionAddress = address(new ApeToken(_underlyingTokenId));
+        address apeTokenAddress = address(apeTokenInstance);
 
         // Store ApeToken collection address in mapping
         // linking it to underlying token's id
-        _apeTokenAddressPerTokenId[_underlyingTokenId] = _apeTokenCollectionAddress;
-
-        // Create a local instance of the ApeToken standard
-        ApeToken _apeTokenCollectionInstance = ApeToken(_apeTokenCollectionAddress);
+        _apeTokenAddressPerTokenId[_underlyingTokenId] = apeTokenAddress;
 
         for(uint i = 0; i < _apeTokenAmount; i++) {
             // Every new ApeToken id's will be linked to the
@@ -75,7 +75,8 @@ contract ApeTokenFactory /*is ApeToken*/ {
             uint _apeTokenId = (_underlyingTokenId * 1000) + i;
 
             // Mint a new ApeToken with the newly generated ApeToken id
-            _apeTokenCollectionInstance._safemint(_currentHolder, _apeTokenId);
+            // _apeTokenCollectionInstance._safemint(_currentHolder, _apeTokenId);
+            apeTokenInstance._safeMint(_currentHolder, _apeTokenId);
         }
     }
 
@@ -105,7 +106,7 @@ contract ApeTokenFactory /*is ApeToken*/ {
     }
 
     function ownerOf(uint _tokenId, uint _apeTokenId) internal view returns (address _owner) {
-        return ApeToken(_apeTokenAddressPerTokenId[_tokenId]).owners(_apeTokenId);
+        return ApeToken(_apeTokenAddressPerTokenId[_tokenId]).ownerOf(_apeTokenId);
     }
 
 }

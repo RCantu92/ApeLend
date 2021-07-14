@@ -52,7 +52,10 @@ contract ApeToken /*is IERC721*/ {
     //
     // Emits a {Transfer} event.
     //
-    function _safeMint(address _to, uint256 _apeTokenId) internal virtual {
+    // CHANGE VISIBILITY FROM PUBLIC TO INTERNAL
+    // (FIGURE OUT HOW TO DO EXACTLY THAT, WHILE
+    // KEEPING SAFETY IN MIND)
+    function _safeMint(address _to, uint256 _apeTokenId) public /*internal*/ {
         _safeMint(_to, _apeTokenId, "");
     }
 
@@ -60,7 +63,10 @@ contract ApeToken /*is IERC721*/ {
     // @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
     // forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
     //
-    function _safeMint(address _to, uint256 _apeTokenId, bytes memory _data) internal virtual {
+    // CHANGE VISIBILITY FROM PUBLIC TO INTERNAL
+    // (FIGURE OUT HOW TO DO EXACTLY THAT, WHILE
+    // KEEPING SAFETY IN MIND)
+    function _safeMint(address _to, uint256 _apeTokenId, bytes memory _data) public /*internal*/ {
         _mint(_to, _apeTokenId);
         // COMMENT OUT FOLLOWING LINE
         // (CONCERNS SMART CONTRACT ADDRESSES FROM RECEIVING APETOKENS)
