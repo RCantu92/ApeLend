@@ -60,7 +60,7 @@ contract ApeTokenFactory /*is ApeToken*/ {
         require(_apeTokenAmount < 25, "ApeToken: You cannot mint more than 25 apeTokens per token");
 
         // Set tokens return window
-        apeTokenReturnWindow = block.timestamp + apeTokenReturnWindow;
+        apeTokenReturnWindow = block.timestamp + _apeTokenReturnWindow;
 
         // Create new ApeToken contract instance
         ApeToken apeTokenInstance = new ApeToken(_underlyingTokenId);
@@ -142,6 +142,10 @@ contract ApeTokenFactory /*is ApeToken*/ {
 
     function ownerOf(uint _tokenId, uint _apeTokenId) internal view returns (address _owner) {
         return ApeToken(_apeTokenAddressPerTokenId[_tokenId]).ownerOf(_apeTokenId);
+    }
+
+    function apeTokenSupply(uint _tokenId) internal view returns (uint _apeTokenTotalSupply) {
+        return _apeTokenTotalSupplyPerToken[_tokenId];
     }
 
 }

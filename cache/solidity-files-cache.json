@@ -429,8 +429,8 @@
       ]
     },
     "/Users/robertocantu/blockchain_programming/ApeLend/contracts/ApeLend.sol": {
-      "lastModificationDate": 1626200745526,
-      "contentHash": "0c84be3e64f2452093811556daec0ffc",
+      "lastModificationDate": 1626452042403,
+      "contentHash": "2ae11c28868a0e7ad17c03697ad1c5f6",
       "sourceName": "contracts/ApeLend.sol",
       "solcConfig": {
         "version": "0.8.6",
@@ -469,8 +469,8 @@
       ]
     },
     "/Users/robertocantu/blockchain_programming/ApeLend/contracts/ApeTokenFactory.sol": {
-      "lastModificationDate": 1626225283806,
-      "contentHash": "1a2b38e8aade25318168c83b98b2b14a",
+      "lastModificationDate": 1626285984801,
+      "contentHash": "35db7654d59c41eddbfd8f72868402f7",
       "sourceName": "contracts/ApeTokenFactory.sol",
       "solcConfig": {
         "version": "0.8.6",
@@ -505,8 +505,8 @@
       ]
     },
     "/Users/robertocantu/blockchain_programming/ApeLend/contracts/ApeToken.sol": {
-      "lastModificationDate": 1626225190118,
-      "contentHash": "7695057e1067c93086de55f38af192c0",
+      "lastModificationDate": 1626277439083,
+      "contentHash": "5b5fdccebdb29b87e48778ca0d87cf21",
       "sourceName": "contracts/ApeToken.sol",
       "solcConfig": {
         "version": "0.8.6",
@@ -536,6 +536,43 @@
       ],
       "artifacts": [
         "ApeToken"
+      ]
+    },
+    "/Users/robertocantu/blockchain_programming/ApeLend/contracts/TestERC721.sol": {
+      "lastModificationDate": 1626454145017,
+      "contentHash": "8c2654837b42bdb2ac91657b1852bcac",
+      "sourceName": "contracts/TestERC721.sol",
+      "solcConfig": {
+        "version": "0.8.6",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "hardhat/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.6"
+      ],
+      "artifacts": [
+        "TestERC721"
       ]
     }
   }

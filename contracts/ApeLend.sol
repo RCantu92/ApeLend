@@ -11,6 +11,8 @@ import "hardhat/console.sol";
 
 contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
 
+    ERC721 erc721;
+
     // Address of the protocol creator
     address apeCreator;
 
@@ -64,9 +66,12 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
     }
     */
 
+    /*
+    // DELETE THIS FUNCTION?
     function safeMint(address _to, uint256 _tokenId) public {
         ERC721._safeMint(_to, _tokenId);
     }
+    */
 
     // Function that allows contract to hold tokens
     function onERC721ReceivedToProtocol(
@@ -80,15 +85,14 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
 
     // Function to lend token
     // to protocol
-    function lendToken(uint _tokenId, uint _apeTokenAmount, uint _apeTokenReturnWindow) public {
+    function lendToken(address _tokenAddress, uint _tokenId, uint _apeTokenAmount, uint _apeTokenReturnWindow) public {
+        // Create local instance of
+        // token's ERC721 contract
+        erc721 = ERC721(_tokenAddress);
 
         // Verify caller of function is
         // Owner of provided token ID
-        require(msg.sender == ERC721.ownerOf(_tokenId), "ApeLend: You are not the owner of this token");
-
-        // Local variable tracking owner of
-        // underlying tokenId
-        // address _tokenOwner = ERC721.ownerOf(_tokenId);
+        require(msg.sender == erc721.ownerOf(_tokenId), "ApeLend: You are not the owner of this token");
 
         // Add to mapping that displays
         // tokens that have been collateralized
@@ -97,23 +101,25 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
 
         // Approve ApeLend address
         // to transfer token
-        ERC721.approve(address(this), _tokenId);
+        // ERC721.approve(address(this), _tokenId);
+        erc721.setApprovalForAll(address(this), true);
 
         // Confirm ApeLend contract
         // can receive tokens
-        onERC721ReceivedToProtocol(msg.sender, msg.sender, _tokenId, "");
+        onERC721ReceivedToProtocol(address(this), msg.sender, _tokenId, "");
 
         // Declare and assign variable storing
         // ApeLend address
         address _apeLendAddress = address(this);
 
-        // Add address to mapping that show they have
-        // provided a token to ApeLend
+        // Add caller address to mapping that show
+        // they have provided a token to ApeLend
         _providedToken[msg.sender] = true;
 
-        // Transfer ownership of token to
-        // ApeLend protocol address
-        ERC721.safeTransferFrom(msg.sender, address(this), _tokenId);
+        // Transfer token to
+        // ApeLend protocol
+        // CHANGE BACK TO SAFETRANSFERFROM
+        erc721.safeTransferFrom(msg.sender, address(this), _tokenId);
 
         // Mint new ApeTokens
         // FIGURE OUT THE STRINGS FOR NAME AND SYMBOL LATER
@@ -180,7 +186,9 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
     function pullToken(uint _tokenId) public {
         // Confirm function caller is current
         // true owner of token
-        require(msg.sender == ERC721.ownerOf(_tokenId), "ApeLend: You are not the true owner of provided token");
+        // WILL UNDERLYING ERC721 LOGIC HANDLE TRANSFERRING TOKENS
+        // ACTUAL OWNER FROM PROTOCOL?
+        // require(msg.sender == ERC721.ownerOf(_tokenId), "ApeLend: You are not the true owner of provided token");
 
         // Update token's
         // collateralization status
@@ -193,7 +201,9 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         // Transfer ownership of token from
         // ApeLend protocol address
         // to true token owner
-        ERC721.safeTransferFrom(address(this), msg.sender, _tokenId);
+        // HOW TO WITHDRAW TOKEN FROM
+        // PROTOCOL
+        ERC721.transferFrom(address(this), msg.sender, _tokenId);
     }
 
     /*
@@ -212,6 +222,10 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
 
     function ownerOfApeToken(uint _tokenId, uint _apeTokenId) public view returns (address _apeTokenOwner) {
         return ApeTokenFactory.ownerOf(_tokenId, _apeTokenId);
+    }
+
+    function apeTokenTotalSupply(uint _tokenId) public view returns (uint _apeTokenTotalSupply) {
+        return ApeTokenFactory.apeTokenSupply(_tokenId);
     }
 
     // Returns the number of tokens in ``owner``'s account.
