@@ -11,10 +11,19 @@ import "hardhat/console.sol";
 // address
 contract TestERC721 is ERC721 {
 
-    // Set name of NFT collection
-    // and symbol upon contract deployment
+    /**
+     * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
+     */
+     // ONLY ADDED THIS FOR TESTING
     constructor (string memory _name, string memory _symbol) ERC721(_name, _symbol) { }
 
+    function approveApeLend(address _to, uint _tokenId) public /*override*/ {
+        approve(_to, _tokenId);
+    }
+
+    /**
+     * @dev Safely mints `tokenId` and transfers it to `to`.
+     */
     function safeMint(address _to, uint _tokenId) public {
         _safeMint(_to, _tokenId);
     }

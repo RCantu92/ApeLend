@@ -3,6 +3,7 @@
 pragma solidity ^0.8.6;
 
 import "./ApeTokenFactory.sol";
+import "./TestERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -11,7 +12,11 @@ import "hardhat/console.sol";
 
 contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
 
-    ERC721 erc721;
+    // IN ACTUALITY, THIS WOULD BE:
+    // ERC721 erc721
+    // TO BE ABLE TO CREATE LOCAL
+    // INSTANCES OF CONTRACTS
+    TestERC721 erc721;
 
     // Address of the protocol creator
     address apeCreator;
@@ -49,27 +54,22 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         apeCreator = msg.sender;
     }
 
-    /*
     // Function to give or rescind approval to
     // ApeLend to handle token transactions
     // (HARDCODE IN PROTOCOL'S ADDRESS)
     // NAMING THIS FUNCTION `setApprovalForAll()`
     // WAS THROWING "setApprovalForAll is not a function"
-    function approveProtocolAddress(bool _approved) public {
-        ERC721.setApprovalForAll(0x5FbDB2315678afecb367f032d93F642f64180aa3, _approved);
+    function approveApeLend(address _tokenAddress, uint _tokenId) public {
+        // Create local instance of
+        // token's ERC721 contract
+        erc721 = TestERC721(_tokenAddress);
+
+        erc721.approve(address(this), _tokenId);
     }
-    */
 
     /*
     function safeTransferFrom(address _from, address _to, uint256 _tokenId) public override {
         ERC721.safeTransferFrom(_from, _to, _tokenId);
-    }
-    */
-
-    /*
-    // DELETE THIS FUNCTION?
-    function safeMint(address _to, uint256 _tokenId) public {
-        ERC721._safeMint(_to, _tokenId);
     }
     */
 
@@ -88,7 +88,7 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
     function lendToken(address _tokenAddress, uint _tokenId, uint _apeTokenAmount, uint _apeTokenReturnWindow) public {
         // Create local instance of
         // token's ERC721 contract
-        erc721 = ERC721(_tokenAddress);
+        erc721 = TestERC721(_tokenAddress);
 
         // Verify caller of function is
         // Owner of provided token ID
@@ -98,11 +98,6 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         // tokens that have been collateralized
         // for newly minted ApeTokens
         _tokenCollateralized[_tokenId] = true;
-
-        // Approve ApeLend address
-        // to transfer token
-        // ERC721.approve(address(this), _tokenId);
-        erc721.setApprovalForAll(address(this), true);
 
         // Confirm ApeLend contract
         // can receive tokens

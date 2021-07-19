@@ -29,6 +29,8 @@ describe("ApeLend and TestERC721 contracts", function() {
         // Mint new token with ID of `1`
         await TestERC721.safeMint(firstAccount.address, 1);
 
+        console.log("msg.sender calling safeMint() in ApeLend.test.js is %s", firstAccount.address);
+
         // Confirm owner of token is firstAccount
         expect(await TestERC721.ownerOf(1)).to.equal(firstAccount.address);
     })
@@ -49,9 +51,12 @@ describe("ApeLend and TestERC721 contracts", function() {
 
     it("should allow the lending of a token, thus minting some new ApeTokens", async function() {
 
-        // Have the first account lend a token
+        // Give approval to ApeLend
+        await TestERC721.approveApeLend(ApeLend.address, 1);
+
+        // Have firstAccount lend a token `1`
         // to ApeLend and mint 10 new ApeTokens
-        await ApeLend.lendToken(1, 10, 1);
+        await ApeLend.lendToken(TestERC721.address, 1, 10, 1);
 
         // Confirm the current owner of the ApeTokens
         // is the ApeLend protocol
