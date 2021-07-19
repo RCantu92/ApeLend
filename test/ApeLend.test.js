@@ -29,8 +29,6 @@ describe("ApeLend and TestERC721 contracts", function() {
         // Mint new token with ID of `1`
         await TestERC721.safeMint(firstAccount.address, 1);
 
-        console.log("msg.sender calling safeMint() in ApeLend.test.js is %s", firstAccount.address);
-
         // Confirm owner of token is firstAccount
         expect(await TestERC721.ownerOf(1)).to.equal(firstAccount.address);
     })
@@ -84,20 +82,23 @@ describe("ApeLend and TestERC721 contracts", function() {
 
     it("should allow a token to be taken out of ApeLend, thus burning corresponding ApeTokens", async function() {
         // Mint new token with ID of `23` to thirdAccount
-        await ApeLend.connect(thirdAccount).safeMint(thirdAccount.address, 23);
+        await TestERC721.connect(thirdAccount).safeMint(thirdAccount.address, 23);
 
-        // Confirm third is the owner
+        // Confirm thirdAccount is the owner
         // of token id `23`
-        expect(await ApeLend.connect(thirdAccount).ownerOf(23)).to.equal(thirdAccount.address);
+        expect(await TestERC721.connect(thirdAccount).ownerOf(23)).to.equal(thirdAccount.address);
 
-        // Lend token id to ApeLend,
+        // Give approval to ApeLend
+        await TestERC721.connect(thirdAccount).approveApeLend(ApeLend.address, 23);
+
+        // Lend token id `23` to ApeLend,
         // mint 20 corresponding ApeTokens,
         // and make loan term length 2 minutes
-        await ApeLend.connect(thirdAccount).lendToken(23, 20, 120);
+        await ApeLend.connect(thirdAccount).lendToken(TestERC721.address, 23, 20, 120);
 
         // Confirm that ApeLend is now in
         // possesion of provided token
-        expect(await ApeLend.connect(thirdAccount).ownerOf(23)).to.equal(ApeLend.address);
+        expect(await TestERC721.connect(thirdAccount).ownerOf(23)).to.equal(ApeLend.address);
 
         // Confirm there are 20 ApeTokens
         // for token id `23`
@@ -111,15 +112,15 @@ describe("ApeLend and TestERC721 contracts", function() {
 
         // Pull token thus burning supply
         // of corresponding ApeTokens
-        await ApeLend.connect(thirdAccount).pullToken(23);
+        await ApeLend.connect(thirdAccount).pullToken(TestERC721.address, 23);
 
-        // Confirm that token id's corresponding
+        // Confirm that token id `23` corresponding
         // ApeTokens have been burned
         expect(await ApeLend.connect(thirdAccount).apeTokenTotalSupply(23)).to.equal(0);
 
         // Confirm that the possesion of
         // token id `23` is back with thirdAccount
-        expect(await ApeLend.connect(thirdAccount).ownerOf(23)).to.equal(thirdAccount.address);
+        expect(await TestERC721.connect(thirdAccount).ownerOf(23)).to.equal(thirdAccount.address);
     })
 
     //it("should not allow an owner to pull token, burn ApeTokens, until time has loan term has elapsed", async function() {

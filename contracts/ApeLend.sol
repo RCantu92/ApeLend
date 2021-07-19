@@ -178,12 +178,15 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
     */
 
     // Function to pull token from ApeLend
-    function pullToken(uint _tokenId) public {
-        // Confirm function caller is current
-        // true owner of token
-        // WILL UNDERLYING ERC721 LOGIC HANDLE TRANSFERRING TOKENS
-        // ACTUAL OWNER FROM PROTOCOL?
-        // require(msg.sender == ERC721.ownerOf(_tokenId), "ApeLend: You are not the true owner of provided token");
+    function pullToken(address _tokenAddress, uint _tokenId) public {
+        // Create local instance of
+        // token's ERC721 contract
+        erc721 = TestERC721(_tokenAddress);
+
+        // Verify caller of function is
+        // Owner of provided token ID
+        // IS IT NECESSARY TO INCLUDE A CHECK FOR TOKEN OWNERSHIP?
+        // require(msg.sender == erc721.ownerOf(_tokenId), "ApeLend: You are not the owner of this token");
 
         // Update token's
         // collateralization status
@@ -198,7 +201,7 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
         // to true token owner
         // HOW TO WITHDRAW TOKEN FROM
         // PROTOCOL
-        ERC721.transferFrom(address(this), msg.sender, _tokenId);
+        erc721.transferFrom(address(this), msg.sender, _tokenId);
     }
 
     /*
@@ -207,13 +210,14 @@ contract ApeLend is ERC721, ERC721Holder, ApeTokenFactory {
     function isTokenAvailable(uint _tokenId) public view returns (bool) {
         return _isTokenAvailable[_tokenId];
     }
-    */
+    
     
     // Function to check the owner address
     // of a token by tokenId
     function ownerOf(uint _tokenId) public view override returns (address) {
         return ERC721.ownerOf(_tokenId);
     }
+    */
 
     function ownerOfApeToken(uint _tokenId, uint _apeTokenId) public view returns (address _apeTokenOwner) {
         return ApeTokenFactory.ownerOf(_tokenId, _apeTokenId);
