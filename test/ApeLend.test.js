@@ -63,12 +63,14 @@ describe("ApeLend and TestERC721 contracts", function() {
         expect(await ApeLend.ownerOfApeToken(1, 1001)).to.equal(ApeLend.address);
     })
 
-    /*
     it("should allow the borrowing of a ApeToken", async function() {
+
+        // Give approval to ApeLend
+        await TestERC721.connect(secondAccount).approveApeLend(ApeLend.address, 11);
 
         // Have the second account lend a token
         // to ApeLend and mint 10 new ApeTokens
-        await ApeLend.connect(secondAccount).lendToken(11, 10, 1);
+        await ApeLend.connect(secondAccount).lendToken(TestERC721.address, 11, 10, 1);
 
         // Have the second account borrow a token
         // after having already lent a token to
