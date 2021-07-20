@@ -10,8 +10,17 @@ describe("ApeLend and TestERC721 contracts", function() {
         const apeLend = await ethers.getContractFactory("ApeLend");
         const testERC721 = await ethers.getContractFactory("TestERC721");
 
-        // Pull six accounts
-        [firstAccount, secondAccount, thirdAccount, fourthAccount, fifthAccount, sixthAccount] = await ethers.getSigners();
+        // Pull eight accounts
+        [
+            firstAccount,
+            secondAccount,
+            thirdAccount,
+            fourthAccount,
+            fifthAccount,
+            sixthAccount,
+            seventhAccount,
+            eightAccount
+        ] = await ethers.getSigners();
 
         // Deploy ApeLend and testERC721 from first account
         ApeLend = await apeLend.deploy();
@@ -151,7 +160,60 @@ describe("ApeLend and TestERC721 contracts", function() {
     })
     
     it("should mint new apeTokens to an already existing ApeToken contract", async function() {
+        // Mint new token with ID of `45`
+        await TestERC721.connect(fifthAccount).safeMint(fifthAccount.address, 45);
 
+        // Confirm owner of token is fifthAccount
+        expect(await TestERC721.connect(fifthAccount).ownerOf(45)).to.equal(fifthAccount.address);
+
+        // Give approval to ApeLend
+        await TestERC721.connect(fifthAccount).approveApeLend(ApeLend.address, 45);
+
+        // Have fifthAccount lend a token `45`
+        // to ApeLend and mint 10 new ApeTokens
+        await ApeLend.connect(fifthAccount).lendToken(TestERC721.address, 45, 10, 1);
+
+        // Confirm the current owner of token `45`
+        // is the ApeLend protocol
+        expect(await TestERC721.connect(fifthAccount).ownerOf(45)).to.equal(ApeLend.address);
+
+        // Confirm the number of ApeToken total supply
+        // for token id `45` is 10
+        expect(await ApeLend.connect(fifthAccount).apeTokenTotalSupply(45)).to.equal(10);
+
+        // Provide time unit (1 minute) by how much to increase
+        // Hardhat Network, then advance to desired block
+        await time.increase(time.duration.minutes(1));
+        await time.advanceBlock();
+
+        // Have fifthAccount pull token id `45`
+        await ApeLend.connect(fifthAccount).pullToken(TestERC721.address, 45);
+
+        // Confirm the number of ApeToken total supply
+        // for token id `45` is 0
+        expect(await ApeLend.connect(fifthAccount).apeTokenTotalSupply(45)).to.equal(0);
+
+        // Transfer token `45` to sixthAccount
+        await TestERC721.connect(fifthAccount).testTransferFrom(fifthAccount.address, sixthAccount.address, 45);
+
+        // Confirm the token has been transfered to sixthAccount
+        // from fifthAccount
+        expect(await TestERC721.connect(sixthAccount).ownerOf(45)).to.equal(sixthAccount.address);
+
+        // Give approval to ApeLend
+        await TestERC721.connect(sixthAccount).approveApeLend(ApeLend.address, 45);
+
+        // Have sixthAccount lend a token `45`
+        // to ApeLend and mint 15 new ApeTokens
+        await ApeLend.connect(sixthAccount).lendToken(TestERC721.address, 45, 15, 1);
+
+        // Confirm the current owner of the ApeTokens
+        // is the ApeLend protocol
+        expect(await ApeLend.connect(sixthAccount).ownerOfApeToken(45, 45001)).to.equal(ApeLend.address);
+
+        // Confirm that token id `45` corresponding
+        // ApeTokens have been minted
+        expect(await ApeLend.connect(sixthAccount).apeTokenTotalSupply(45)).to.equal(15);
     })
 
     /*

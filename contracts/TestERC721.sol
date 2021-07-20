@@ -28,4 +28,8 @@ contract TestERC721 is ERC721 {
         _safeMint(_to, _tokenId);
     }
 
+    function testTransferFrom(address _from, address _to, uint256 _tokenId) public /*override*/ {
+        safeTransferFrom(_from, _to, _tokenId);
+    }
+
 }
