@@ -79,7 +79,7 @@ describe("ApeLend and TestERC721 contracts", function() {
         expect(await ApeLend.connect(secondAccount).ownerOfApeToken(1, 1002)).to.equal(secondAccount.address);
     })
 
-    it("should allow a token to be taken out of ApeLend, thus burning corresponding ApeTokens", async function() {
+    it("should allow a token to be pulled out of ApeLend, thus burning corresponding ApeTokens", async function() {
         // Mint new token with ID of `23` to thirdAccount
         await TestERC721.connect(thirdAccount).safeMint(thirdAccount.address, 23);
 
@@ -104,8 +104,7 @@ describe("ApeLend and TestERC721 contracts", function() {
         expect(await ApeLend.connect(thirdAccount).apeTokenTotalSupply(23)).to.equal(20);
 
         // Provide time unit (3 minutes) by how much to increase
-        // Hardhat Network
-        // Then advance to desired block
+        // Hardhat Network, then advance to desired block
         await time.increase(time.duration.minutes(3));
         await time.advanceBlock();
 
@@ -134,13 +133,13 @@ describe("ApeLend and TestERC721 contracts", function() {
         await TestERC721.connect(fourthAccount).approveApeLend(ApeLend.address, 32);
 
         // Lend token id `32` to ApeLend,
-        // mint 30 corresponding ApeTokens,
+        // mint 20 corresponding ApeTokens,
         // and make loan term length 5 minutes
         await ApeLend.connect(fourthAccount).lendToken(TestERC721.address, 32, 20, 300);
 
         // Expect pulling token to fail,
         // thus unable to burn supply of corresponding ApeTokens
-        await expectRevert(ApeLend.connect(fourthAccount).pullToken(TestERC721.address, 23), "ApeTokenFactory: Corresponding ApeTokens cannot be burned at this time");
+        await expectRevert(ApeLend.connect(fourthAccount).pullToken(TestERC721.address, 32), "ApeLend: You cannot pull your token at this time");
 
         // Confirm that token id `32` corresponding
         // ApeTokens have NOT been burned
@@ -150,4 +149,18 @@ describe("ApeLend and TestERC721 contracts", function() {
         // token id `32` is still with ApeLend
         expect(await TestERC721.connect(fourthAccount).ownerOf(32)).to.equal(ApeLend.address);
     })
+    
+    it("should mint new apeTokens to an already existing ApeToken contract", async function() {
+
+    })
+
+    /*
+    it("should allow the lending of multiple ERC721 tokens from the same user", async function() {
+
+    })
+
+    it("should only allow an owner of an ERC721 to pull it from ApeLend", async function() {
+
+    })
+    */
 })

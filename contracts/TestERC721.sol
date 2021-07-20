@@ -9,12 +9,12 @@ import "hardhat/console.sol";
 // Contract that allows new NFTs to be minted
 // and also tracks ownership of NFTs to owner
 // address
+// ONLY ADDED THIS FOR TESTING
 contract TestERC721 is ERC721 {
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-     // ONLY ADDED THIS FOR TESTING
     constructor (string memory _name, string memory _symbol) ERC721(_name, _symbol) { }
 
     function approveApeLend(address _to, uint _tokenId) public /*override*/ {
