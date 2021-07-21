@@ -216,13 +216,53 @@ describe("ApeLend and TestERC721 contracts", function() {
         expect(await ApeLend.connect(sixthAccount).apeTokenTotalSupply(45)).to.equal(15);
     })
 
-    /*
     it("should allow the lending of multiple ERC721 tokens from the same user", async function() {
+        // For loop that calls the function
+        // to mint five new tokens to seventhAccount
+        for(let count = 61; count < 66; count++) {
+            await TestERC721.connect(seventhAccount).safeMint(seventhAccount.address, count);
+        }
 
+        // confirm seventhAccount has five tokens
+        // (length of array should be `5` items)
+        expect(await TestERC721.connect(seventhAccount)
+            .balanceOf(seventhAccount.address)).to.equal(5);
+
+        // Approve ApeLend for two of seventhAccount's
+        // ERC721's tokens, tokens `62` and `64`
+        await TestERC721.connect(seventhAccount).approveApeLend(ApeLend.address, 62);
+        await TestERC721.connect(seventhAccount).approveApeLend(ApeLend.address, 64);
+
+        // Have seventhAccount lend a token `62`
+        // and `64` to ApeLend and mint 8 and 7
+        // new ApeTokens, respectively
+        await ApeLend.connect(seventhAccount).lendToken(TestERC721.address, 62, 8, 1);
+        await ApeLend.connect(seventhAccount).lendToken(TestERC721.address, 64, 7, 1);
+
+        // Confirm ApeLend is the current owner of both token id `62` and `64`
+        expect(await TestERC721.connect(seventhAccount).ownerOf(62)).to.equal(ApeLend.address);
+        expect(await TestERC721.connect(seventhAccount).ownerOf(64)).to.equal(ApeLend.address);
+
+        // Confirm the current owner of the ApeTokens
+        // is the ApeLend protocol
+        expect(await ApeLend.connect(seventhAccount).ownerOfApeToken(62, 62001)).to.equal(ApeLend.address);
+        expect(await ApeLend.connect(seventhAccount).ownerOfApeToken(64, 64001)).to.equal(ApeLend.address);
+
+        // Provide time unit (1 minute) by how much to increase
+        // Hardhat Network, then advance to desired block
+        await time.increase(time.duration.minutes(1));
+        await time.advanceBlock();
+
+        // Have seventhAccount pull token ids `62` and `64`
+        await ApeLend.connect(seventhAccount).pullToken(TestERC721.address, 62);
+        await ApeLend.connect(seventhAccount).pullToken(TestERC721.address, 64);
+
+        // Confirm seventhAccount is the current owner of both token id `62` and `64`
+        expect(await TestERC721.connect(seventhAccount).ownerOf(62)).to.equal(seventhAccount.address);
+        expect(await TestERC721.connect(seventhAccount).ownerOf(64)).to.equal(seventhAccount.address);
     })
 
     it("should only allow an owner of an ERC721 to pull it from ApeLend", async function() {
 
     })
-    */
 })
