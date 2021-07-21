@@ -19,7 +19,8 @@ describe("ApeLend and TestERC721 contracts", function() {
             fifthAccount,
             sixthAccount,
             seventhAccount,
-            eightAccount
+            eightAccount,
+            ninthAccount
         ] = await ethers.getSigners();
 
         // Deploy ApeLend and testERC721 from first account
@@ -148,7 +149,8 @@ describe("ApeLend and TestERC721 contracts", function() {
 
         // Expect pulling token to fail,
         // thus unable to burn supply of corresponding ApeTokens
-        await expectRevert(ApeLend.connect(fourthAccount).pullToken(TestERC721.address, 32), "ApeLend: You cannot pull your token at this time");
+        await expectRevert(ApeLend.connect(fourthAccount).pullToken(TestERC721.address, 32),
+            "ApeLend: You cannot pull your token at this time");
 
         // Confirm that token id `32` corresponding
         // ApeTokens have NOT been burned
@@ -263,6 +265,36 @@ describe("ApeLend and TestERC721 contracts", function() {
     })
 
     it("should only allow an owner of an ERC721 to pull it from ApeLend", async function() {
+        // Mint new token with ID of `77`
+        await TestERC721.connect(eightAccount).safeMint(eightAccount.address, 77);
 
+        // Confirm owner of token is firstAccount
+        expect(await TestERC721.connect(eightAccount).ownerOf(77)).to.equal(eightAccount.address);
+
+        // Give approval to ApeLend
+        await TestERC721.connect(eightAccount).approveApeLend(ApeLend.address, 77);
+
+        // Have eightAccount lend a token `77`
+        // to ApeLend and mint 22 new ApeTokens
+        await ApeLend.connect(eightAccount).lendToken(TestERC721.address, 77, 22, 1);
+
+        // Confirm ApeLend is the current owner of token id `77'
+        expect(await TestERC721.connect(eightAccount).ownerOf(77)).to.equal(ApeLend.address);
+
+        // Provide time unit (1 minute) by how much to increase
+        // Hardhat Network, then advance to desired block
+        await time.increase(time.duration.minutes(1));
+        await time.advanceBlock();
+
+        // Expect pulling of token by ninthAccount to fail,
+        // thus unable to burn supply of corresponding ApeTokens
+        await expectRevert(ApeLend.connect(ninthAccount).pullToken(TestERC721.address, 77),
+            "ApeLend: You are not the owner of this token");
+
+        // Have eightAccount pull token ids `77`
+        await ApeLend.connect(eightAccount).pullToken(TestERC721.address, 77);
+
+        // Confirm eigthAccount is the current owner of token id `77`
+        expect(await TestERC721.connect(eightAccount).ownerOf(77)).to.equal(eightAccount.address);
     })
 })
